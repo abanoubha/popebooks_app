@@ -8,3 +8,12 @@ Mainly there are 2 old codebases:
 2. Java programming language + SQLite db
 
 But this new codebase will be written in Kotlin with UI in Jetpack Compose + SQLite db with more features.
+
+## Tasks
+
+- [x] 18 books added
+- [ ] 0 poems added
+- [x] migrate from plain text files to SQlite db (from old codebase)
+- [x] remember last opened page (from old codebase)
+- [ ] search all books
+- [ ] search in a certain book
