@@ -25,6 +25,10 @@ Current state of the app according to the vision:
 - the app is around 10 MB which is great
 - the app is available for smartphones with Android 6.0 (2015) up to Android 14 (2023, the latest version)
 
+## Why opensource ?
+
+I created the app to be available to all people who need it, all the time, everywhere. I'd like to create a developer community to maintain the app indefinitely.
+
 ## Roadmap | timeline of release versions with tasks
 
 - older app releases
