@@ -9,11 +9,15 @@ Mainly there are 2 old codebases:
 
 But this new codebase will be written in Kotlin with UI in Jetpack Compose + SQLite db with more features.
 
-## Tasks
+## Roadmap | timeline of release versions with tasks
 
-- [x] 18 books added
-- [ ] 0 poems added
-- [x] migrate from plain text files to SQlite db (from old codebase)
-- [x] remember last opened page (from old codebase)
-- [ ] search all books
-- [ ] search in a certain book
+- v2.0.0
+  - 18 books added
+  - remember last opened page (from old codebase)
+  - migrate from plain text files to SQlite db (from old codebase)
+  - support Android 6.0 up to Android 14 (SDK 34)
+- Next Version
+  - 0 poems added
+  - search in all books
+  - search in a certain book
+
