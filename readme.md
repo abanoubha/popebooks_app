@@ -37,9 +37,15 @@ Current state of the app according to the vision:
   - migrate from plain text files to SQlite db (from old codebase)
   - still written in Java with XML Android Layouts
   - support Android 6.0 up to Android 14 (SDK 34)
-- Next Version
+- v2.0.1
+  - upgrade AGP
+  - upgrade Kotlin
+  - upgrade kotlin coroutines
+- v2.0.2
+  - fix an issue with R8 minification called "missing classes". I wrote a blog about this incident.
+- v3.0.0 (upcoming)
   - rewrite the app in Kotlin with Jetpack Compose
+- Next Version
   - 0 poems added
   - search in all books
   - search in a certain book
-
