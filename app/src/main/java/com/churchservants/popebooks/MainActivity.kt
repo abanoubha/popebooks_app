@@ -100,7 +100,7 @@ fun BookListScreen(modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
 
             Text(
-                text = "كتب البابا شنودة",
+                text = stringResource(R.string.titleIn),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
