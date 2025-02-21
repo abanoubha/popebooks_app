@@ -167,14 +167,11 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
     var pageContent by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var bookName by remember { mutableStateOf("") }
-    val maxPagesState = remember(bookId) { mutableIntStateOf(0) }
 
     LaunchedEffect(bookId) {
-        maxPagesState.intValue = getMaxPageCount(db, bookId)
+        maxPages = getMaxPageCount(db, bookId)
         bookName = getBookName(db, bookId)
     }
-
-    maxPages = maxPagesState.intValue
 
     LaunchedEffect(bookId, currentPage) {
         isLoading = true
@@ -279,11 +276,30 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
 }
 
 fun getMaxPageCount(db: SQLiteDatabase, bookId: Int): Int {
-    val cursor =
-        db.query("books", arrayOf("pages"), "id = ?", arrayOf(bookId.toString()), null, null, null)
+// this code is correct, but I did not include pages count in the "pages" column yet
+//    val cursor =
+//        db.query("books", arrayOf("pages"), "id = ?", arrayOf(bookId.toString()), null, null, null)
+//    cursor.use {
+//        if (it.moveToFirst()) {
+//            return it.getInt(it.getColumnIndexOrThrow("pages"))
+//        }
+//    }
+//    return 0
+
+    // I'll use this code temporarily to get the max page number
+    // SELECT COUNT(*) FROM pages WHERE book_id = ?
+    val cursor = db.query(
+        "pages",
+        arrayOf("COUNT(*)"),
+        "book_id = ?",
+        arrayOf(bookId.toString()),
+        null,
+        null,
+        null
+    )
     cursor.use {
         if (it.moveToFirst()) {
-            return it.getInt(it.getColumnIndexOrThrow("pages"))
+            return it.getInt(it.getColumnIndexOrThrow("COUNT(*)"))
         }
     }
     return 0
