@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -247,7 +248,7 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Previous",
                     )
-//                    Text("Previous")
+                    Text("Previous")
                 }
                 Text(
                     "$currentPage / $maxPages",
@@ -265,6 +266,10 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                     colors = ButtonDefaults.buttonColors(Color(0xFFB58863)),
                 ) {
                     Text("Next")
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Next",
+                    )
                 }
             }
         } else {
