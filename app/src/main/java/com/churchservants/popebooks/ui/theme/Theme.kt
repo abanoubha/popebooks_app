@@ -8,33 +8,44 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    background = Color(0xFF42280E),
-    surface = Color(0xFF42280E),
-    onPrimary = Color.Green,
-    onSecondary = Color.Black,
-    onTertiary = Color.Black,
-    onBackground = Color(0xFFf2c5a1),
-    onSurface = Color(0xFFf2c5a1),
+    primary = brown1,
+    onPrimary = brown10,
+
+    secondary = brown3,
+    onSecondary = brown9,
+
+    tertiary = brown5,
+    onTertiary = brown8,
+
+    background = brown10,
+    onBackground = brown1,
+
+    surface = brown10,
+    onSurface = brown1,
+
+    outlineVariant = brown9,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color(0xFFf2c5a1),
-    surface = Color(0xFFf2c5a1),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF42280E),
-    onSurface = Color(0xFF42280E),
+    primary = brown10,
+    onPrimary = brown1,
+
+    secondary = brown8,
+    onSecondary = brown2,
+
+    tertiary = brown6,
+    onTertiary = brown3,
+
+    background = brown1,
+    onBackground = brown10,
+
+    surface = brown1,
+    onSurface = brown10,
+
+    outlineVariant = brown2,
 )
 
 @Composable
