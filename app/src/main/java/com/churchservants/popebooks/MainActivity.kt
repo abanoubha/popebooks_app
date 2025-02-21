@@ -27,12 +27,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -64,20 +64,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PopebooksTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                BookListScreen()
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    BookListScreen(modifier = Modifier.padding(innerPadding))
 //                    FlippingText(
 //                        text = "Hello, Word!",
 //                        modifier = Modifier.padding(innerPadding),
 //                    )
-//                }
+                }
             }
         }
     }
 }
 
 @Composable
-fun BookListScreen() {
+fun BookListScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val db = remember {
         // Open the database from assets
@@ -97,7 +97,7 @@ fun BookListScreen() {
     val books = remember { loadBooks(db) }
 
     if (selectedBookId == -1) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = modifier) {
 
             Text(
                 text = "كتب البابا شنودة",
@@ -243,7 +243,6 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                         }
                     },
                     enabled = currentPage > 1 && !isLoading,
-                    colors = ButtonDefaults.buttonColors(Color(0xFFB58863)),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -253,7 +252,6 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                 }
                 Text(
                     "$currentPage / $maxPages",
-                    color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f),
                 )
@@ -264,7 +262,6 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                         }
                     },
                     enabled = currentPage < maxPages && !isLoading,
-                    colors = ButtonDefaults.buttonColors(Color(0xFFB58863)),
                 ) {
                     Text(stringResource(R.string.next_btn))
                     Icon(
