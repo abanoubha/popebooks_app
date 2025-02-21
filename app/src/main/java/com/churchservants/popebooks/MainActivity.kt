@@ -250,7 +250,7 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
 //                    Text("Previous")
                 }
                 Text(
-                    "Page $currentPage / $maxPages",
+                    "$currentPage / $maxPages",
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f),
