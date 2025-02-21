@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -213,14 +214,14 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                     .verticalScroll(scrollState)
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures { _, dragAmount ->
-                            if (dragAmount > 50) { // Swipe Right (Previous Page)
-                                if (currentPage > 1) {
-                                    currentPage--
-                                    isLoading = true
-                                }
-                            } else if (dragAmount < -50) { // Swipe Left (Next Page)
+                            if (dragAmount > 50) { // Swipe Right (Next Page)
                                 if (currentPage < maxPages) {
                                     currentPage++
+                                    isLoading = true
+                                }
+                            } else if (dragAmount < -50) { // Swipe Left (Previos Page)
+                                if (currentPage > 1) {
+                                    currentPage--
                                     isLoading = true
                                 }
                             }
@@ -246,9 +247,9 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Previous",
+                        contentDescription = stringResource(R.string.previous_btn),
                     )
-                    Text("Previous")
+                    Text(stringResource(R.string.previous_btn))
                 }
                 Text(
                     "$currentPage / $maxPages",
@@ -265,10 +266,10 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
                     enabled = currentPage < maxPages && !isLoading,
                     colors = ButtonDefaults.buttonColors(Color(0xFFB58863)),
                 ) {
-                    Text("Next")
+                    Text(stringResource(R.string.next_btn))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Next",
+                        contentDescription = stringResource(R.string.next_btn),
                     )
                 }
             }
