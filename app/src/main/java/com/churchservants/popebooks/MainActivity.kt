@@ -166,10 +166,12 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
     var maxPages by remember { mutableIntStateOf(0) }
     var pageContent by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var bookName by remember { mutableStateOf("") }
     val maxPagesState = remember(bookId) { mutableIntStateOf(0) }
 
     LaunchedEffect(bookId) {
         maxPagesState.intValue = getMaxPageCount(db, bookId)
+        bookName = getBookName(db, bookId)
     }
 
     maxPages = maxPagesState.intValue
@@ -182,7 +184,7 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Reading") },
+            title = { Text(bookName) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -285,6 +287,16 @@ fun getMaxPageCount(db: SQLiteDatabase, bookId: Int): Int {
         }
     }
     return 0
+}
+
+fun getBookName(db: SQLiteDatabase, bookId: Int): String {
+    val cursor = db.query("books", null, "id = ?", arrayOf(bookId.toString()), null, null, null)
+    cursor.use {
+        if (it.moveToFirst()) {
+            return it.getString(it.getColumnIndexOrThrow("name"))
+        }
+    }
+    return ""
 }
 
 fun loadPageContent(db: SQLiteDatabase, bookId: Int, pageNumber: Int): String? {
