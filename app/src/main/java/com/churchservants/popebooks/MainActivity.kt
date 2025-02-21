@@ -95,16 +95,28 @@ fun BookListScreen() {
     val books = remember { loadBooks(db) }
 
     if (selectedBookId == -1) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(books) { book ->
-                BookItem(book) {
-                    selectedBookId = book.id
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            Text(
+                text = "كتب البابا شنودة",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
+                items(books) { book ->
+                    BookItem(book) {
+                        selectedBookId = book.id
+                    }
+                    HorizontalDivider()
                 }
-                HorizontalDivider()
             }
         }
     } else {
@@ -141,7 +153,7 @@ fun BookItem(book: Book, onClick: () -> Unit) {
             book.name,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Right,
+            modifier = Modifier.weight(1f), // to have the full width, so it can be RTL by the content direction
             style = TextStyle(textDirection = TextDirection.Content),
         )
     }
