@@ -3,6 +3,7 @@ package com.churchservants.popebooks
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,6 +54,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 
 class MainActivity : ComponentActivity() {
@@ -60,21 +67,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         setContent {
-            PopebooksTheme {
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .windowInsetsPadding(WindowInsets.safeDrawing)
-                ) { innerPadding ->
-                    BookListScreen(modifier = Modifier.padding(innerPadding))
-                }
-            }
+            AppContent()
         }
     }
 }
 
 @Composable
-fun BookListScreen(modifier: Modifier = Modifier) {
+fun AppContent() {
+    val navController = rememberNavController()
     val context = LocalContext.current
     val db = remember {
         // Open the database from assets
@@ -90,36 +90,58 @@ fun BookListScreen(modifier: Modifier = Modifier) {
             SQLiteDatabase.OPEN_READONLY
         )
     }
-    var selectedBookId by remember { mutableIntStateOf(-1) }
+
+    NavHost(navController = navController, startDestination = "bookList") {
+
+        composable("bookList") {
+            BookListScreen(navController, db)
+        }
+
+        composable(
+            route = "bookReader/{bookId}",
+            arguments = listOf(navArgument("bookId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getInt("bookId") ?: -1
+            BookReaderScreen(bookId = bookId, db = db, navController = navController)
+        }
+    }
+}
+
+@Composable
+fun BookListScreen(navController: NavController, db: SQLiteDatabase) {
     val books = remember { loadBooks(db) }
 
-    if (selectedBookId == -1) {
-        Column(modifier = modifier) {
+    PopebooksTheme {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
 
-            Text(
-                text = stringResource(R.string.titleIn),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
+                Text(
+                    text = stringResource(R.string.titleIn),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(books) { book ->
-                    BookItem(book) {
-                        selectedBookId = book.id
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    items(books) { book ->
+                        BookItem(book) {
+                            navController.navigate("bookReader/${book.id}")
+                        }
+                        HorizontalDivider()
                     }
-                    HorizontalDivider()
                 }
             }
         }
-    } else {
-        BookReaderScreen(bookId = selectedBookId, db = db, onBack = { selectedBookId = -1 })
     }
 }
 
@@ -160,7 +182,7 @@ fun BookItem(book: Book, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
+fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, navController: NavController) {
     var currentPage by remember { mutableIntStateOf(1) }
     var maxPages by remember { mutableIntStateOf(0) }
     var pageContent by remember { mutableStateOf<String?>(null) }
@@ -178,101 +200,123 @@ fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, onBack: () -> Unit) {
         isLoading = false
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text(bookName) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            },
-            modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
-        )
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .wrapContentHeight(Alignment.CenterVertically)
-            )
-        } else if (pageContent != null) {
-            val scrollState = rememberScrollState()
+    BackHandler {
+        navController.popBackStack(navController.graph.startDestinationId, inclusive = false)
+    }
 
-            Text(
-                text = pageContent!!,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Right,
-                style = TextStyle(textDirection = TextDirection.Content),
+    PopebooksTheme {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) { innerPadding ->
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp)
-                    .verticalScroll(scrollState)
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures { _, dragAmount ->
-                            if (dragAmount > 50) { // Swipe Right (Next Page)
-                                if (currentPage < maxPages) {
-                                    currentPage++
-                                    isLoading = true
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                TopAppBar(
+                    title = { Text(bookName) },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            navController.popBackStack(
+                                navController.graph.startDestinationId,
+                                inclusive = false
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else if (pageContent != null) {
+                    val scrollState = rememberScrollState()
+
+                    Text(
+                        text = pageContent!!,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Right,
+                        style = TextStyle(textDirection = TextDirection.Content),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(16.dp)
+                            .verticalScroll(scrollState)
+                            .pointerInput(Unit) {
+                                detectHorizontalDragGestures { _, dragAmount ->
+                                    if (dragAmount > 50) { // Swipe Right (Next Page)
+                                        if (currentPage < maxPages) {
+                                            currentPage++
+                                            isLoading = true
+                                        }
+                                    } else if (dragAmount < -50) { // Swipe Left (Previos Page)
+                                        if (currentPage > 1) {
+                                            currentPage--
+                                            isLoading = true
+                                        }
+                                    }
                                 }
-                            } else if (dragAmount < -50) { // Swipe Left (Previos Page)
+                            },
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
+                            onClick = {
                                 if (currentPage > 1) {
                                     currentPage--
-                                    isLoading = true
                                 }
-                            }
+                            },
+                            enabled = currentPage > 1 && !isLoading,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.previous_btn),
+                            )
+                            Text(stringResource(R.string.previous_btn))
                         }
-                    },
-            )
+                        Text(
+                            "$currentPage / $maxPages",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Button(
+                            onClick = {
+                                if (currentPage < maxPages) {
+                                    currentPage++
+                                }
+                            },
+                            enabled = currentPage < maxPages && !isLoading,
+                        ) {
+                            Text(stringResource(R.string.next_btn))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = stringResource(R.string.next_btn),
+                            )
+                        }
+                    }
+                } else {
+                    // Handle cases where page content is not found
+                    Text("Error loading page. Please try again.", textAlign = TextAlign.Center)
+                }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(
-                    onClick = {
-                        if (currentPage > 1) {
-                            currentPage--
-                        }
-                    },
-                    enabled = currentPage > 1 && !isLoading,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.previous_btn),
-                    )
-                    Text(stringResource(R.string.previous_btn))
-                }
-                Text(
-                    "$currentPage / $maxPages",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f),
-                )
-                Button(
-                    onClick = {
-                        if (currentPage < maxPages) {
-                            currentPage++
-                        }
-                    },
-                    enabled = currentPage < maxPages && !isLoading,
-                ) {
-                    Text(stringResource(R.string.next_btn))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = stringResource(R.string.next_btn),
-                    )
-                }
             }
-        } else {
-            // Handle cases where page content is not found
-            Text("Error loading page. Please try again.", textAlign = TextAlign.Center)
         }
-
     }
+
 }
 
 fun getMaxPageCount(db: SQLiteDatabase, bookId: Int): Int {
