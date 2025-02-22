@@ -98,11 +98,20 @@ fun AppContent() {
         }
 
         composable(
-            route = "bookReader/{bookId}",
-            arguments = listOf(navArgument("bookId") { type = NavType.IntType })
+            route = "bookReader/{bookId}/{pageNumber}",
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.IntType },
+                navArgument("pageNumber") { type = NavType.IntType }
+            )
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getInt("bookId") ?: -1
-            BookReaderScreen(bookId = bookId, db = db, navController = navController)
+            val pageNumber = backStackEntry.arguments?.getInt("pageNumber") ?: 1
+            BookReaderScreen(
+                bookId = bookId,
+                pageNumber = pageNumber,
+                db = db,
+                navController = navController
+            )
         }
     }
 }
@@ -135,7 +144,7 @@ fun BookListScreen(navController: NavController, db: SQLiteDatabase) {
                 ) {
                     items(books) { book ->
                         BookItem(book) {
-                            navController.navigate("bookReader/${book.id}")
+                            navController.navigate("bookReader/${book.id}/1")
                         }
                         HorizontalDivider()
                     }
@@ -182,8 +191,13 @@ fun BookItem(book: Book, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookReaderScreen(bookId: Int, db: SQLiteDatabase, navController: NavController) {
-    var currentPage by remember { mutableIntStateOf(1) }
+fun BookReaderScreen(
+    bookId: Int,
+    pageNumber: Int,
+    db: SQLiteDatabase,
+    navController: NavController
+) {
+    var currentPage by remember { mutableIntStateOf(pageNumber) }
     var maxPages by remember { mutableIntStateOf(0) }
     var pageContent by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
