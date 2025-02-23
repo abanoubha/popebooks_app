@@ -5,4 +5,5 @@
     <string name="previous_btn">السابق</string>
     <string name="titleIn">كتب البابا شنودة</string>
     <string name="search_in">البحث في %1$s</string>
+    <string name="search">بحث</string>
 </resources>
