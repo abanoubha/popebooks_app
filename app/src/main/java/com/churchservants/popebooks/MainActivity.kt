@@ -1,5 +1,6 @@
 package com.churchservants.popebooks
 
+import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -184,13 +185,25 @@ fun createSummaryWithHighlight(text: String, word: String, limit: Int = 30): Str
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBookScreen(bookId: Int, db: SQLiteDatabase, navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences =
+        remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+    var searchQuery by remember {
+        mutableStateOf(
+            sharedPreferences.getString(
+                "last_search_query",
+                ""
+            ) ?: ""
+        )
+    }
+
     var isLoading by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
 
     LaunchedEffect(searchQuery) {
         isLoading = true
         searchResults = searchBookContent(db, bookId, searchQuery)
+        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
         isLoading = false
     }
 
