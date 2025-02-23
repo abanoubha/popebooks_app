@@ -43,9 +43,12 @@ Current state of the app according to the vision:
   - upgrade kotlin coroutines
 - v2.0.2
   - fix an issue with R8 minification called "missing classes". I wrote a blog about this incident.
-- v3.0.0 (upcoming)
+- v3.0.0
+  - app source code is now open source
   - rewrite the app in Kotlin with Jetpack Compose
+  - touch gesture to swipe between pages of a book
+  - remember the last open page
+  - search in the content of all books
+  - search in the content of a specific book
 - Next Version
   - 0 poems added
-  - search in all books
-  - search in a certain book
