@@ -6,4 +6,5 @@
     <string name="search_in">Search in %1$s</string>
     <string name="search">Search</string>
     <string name="search_results">Search Results (%1$s) :</string>
+    <string name="search_in_all_books">Search in all books</string>
 </resources>

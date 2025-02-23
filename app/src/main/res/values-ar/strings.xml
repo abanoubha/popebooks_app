@@ -7,4 +7,5 @@
     <string name="search_in">البحث في %1$s</string>
     <string name="search">بحث</string>
     <string name="search_results">نتائج البحث (%1$s) :</string>
+    <string name="search_in_all_books">البحث في كل الكتب</string>
 </resources>

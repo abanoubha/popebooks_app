@@ -748,7 +748,7 @@ fun SearchScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Search in all books") },
+                    title = { Text(stringResource(R.string.search_in_all_books)) },
                     navigationIcon = {
                         IconButton(onClick = {
                             navController.popBackStack()
