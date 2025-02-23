@@ -446,7 +446,7 @@ fun BookReaderScreen(
     }
 
     BackHandler {
-        navController.popBackStack(navController.graph.startDestinationId, inclusive = false)
+        navController.popBackStack()
     }
 
     PopebooksTheme {
@@ -456,10 +456,7 @@ fun BookReaderScreen(
                     title = { Text(bookName) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            navController.popBackStack(
-                                navController.graph.startDestinationId,
-                                inclusive = false
-                            )
+                            navController.popBackStack()
                         }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
