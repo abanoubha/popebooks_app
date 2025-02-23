@@ -240,7 +240,7 @@ fun SearchBookScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Search in Book of $bookName") },
+                    title = { Text(stringResource(R.string.search_in, bookName)) },
                     navigationIcon = {
                         IconButton(onClick = {
                             navController.popBackStack()

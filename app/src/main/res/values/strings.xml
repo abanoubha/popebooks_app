@@ -3,4 +3,5 @@
     <string name="next_btn">Next</string>
     <string name="previous_btn">Previous</string>
     <string name="titleIn">كتب البابا شنودة</string>
+    <string name="search_in">Search in %1$s</string>
 </resources>
