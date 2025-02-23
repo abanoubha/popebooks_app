@@ -1,6 +1,7 @@
 package com.churchservants.popebooks
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -101,11 +103,17 @@ fun AppContent() {
             SQLiteDatabase.OPEN_READONLY
         )
     }
+    val sharedPreferences =
+        remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
 
     NavHost(navController = navController, startDestination = "bookList") {
 
         composable("bookList") {
-            BookListScreen(navController, db)
+            BookListScreen(
+                navController = navController,
+                db = db,
+                sharedPreferences = sharedPreferences,
+            )
         }
 
         composable(
@@ -121,7 +129,8 @@ fun AppContent() {
                 bookId = bookId,
                 pageNumber = pageNumber,
                 db = db,
-                navController = navController
+                navController = navController,
+                sharedPreferences = sharedPreferences,
             )
         }
 
@@ -130,7 +139,12 @@ fun AppContent() {
             arguments = listOf(navArgument("bookId") { type = NavType.IntType })
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getInt("bookId") ?: -1
-            SearchBookScreen(bookId = bookId, db = db, navController = navController)
+            SearchBookScreen(
+                bookId = bookId,
+                db = db,
+                navController = navController,
+                sharedPreferences = sharedPreferences,
+            )
         }
     }
 }
@@ -184,10 +198,12 @@ fun createSummaryWithHighlight(text: String, word: String, limit: Int = 30): Str
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBookScreen(bookId: Int, db: SQLiteDatabase, navController: NavController) {
-    val context = LocalContext.current
-    val sharedPreferences =
-        remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+fun SearchBookScreen(
+    bookId: Int,
+    db: SQLiteDatabase,
+    navController: NavController,
+    sharedPreferences: SharedPreferences
+) {
     var searchQuery by remember {
         mutableStateOf(
             sharedPreferences.getString(
@@ -360,27 +376,61 @@ fun searchBookContent(db: SQLiteDatabase, bookId: Int, searchQuery: String): Lis
     return bookPages
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookListScreen(navController: NavController, db: SQLiteDatabase) {
+fun BookListScreen(
+    navController: NavController,
+    db: SQLiteDatabase,
+    sharedPreferences: SharedPreferences
+) {
     val books = remember { loadBooks(db) }
+    val stoppedAtBook by remember {
+        mutableIntStateOf(
+            sharedPreferences.getInt(
+                "stopped_at_book",
+                1
+            ) ?: 1
+        )
+    }
+    val stoppedAtPage by remember {
+        mutableIntStateOf(
+            sharedPreferences.getInt(
+                "stopped_at_page",
+                1
+            ) ?: 1
+        )
+    }
 
     PopebooksTheme {
         Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.titleIn),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            navController.navigate("bookReader/$stoppedAtBook/$stoppedAtPage")
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_bookmarked),
+                                contentDescription = "search in the book's content",
+                            )
+                        }
+                    },
+                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
+                )
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-
-                Text(
-                    text = stringResource(R.string.titleIn),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -439,7 +489,8 @@ fun BookReaderScreen(
     bookId: Int,
     pageNumber: Int,
     db: SQLiteDatabase,
-    navController: NavController
+    navController: NavController,
+    sharedPreferences: SharedPreferences
 ) {
     var currentPage by remember { mutableIntStateOf(pageNumber) }
     var maxPages by remember { mutableIntStateOf(0) }
@@ -455,6 +506,8 @@ fun BookReaderScreen(
     LaunchedEffect(bookId, currentPage) {
         isLoading = true
         pageContent = loadPageContent(db, bookId, currentPage)
+        sharedPreferences.edit().putInt("stopped_at_book", bookId).apply()
+        sharedPreferences.edit().putInt("stopped_at_page", currentPage).apply()
         isLoading = false
     }
 
