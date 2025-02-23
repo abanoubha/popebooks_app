@@ -223,6 +223,7 @@ fun SearchBookScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
+    val bookName by remember { mutableStateOf(getBookName(db = db, bookId = bookId)) }
 
     LaunchedEffect(searchQuery) {
         isLoading = true
@@ -239,7 +240,7 @@ fun SearchBookScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Search in Book of $bookId") },
+                    title = { Text("Search in Book of $bookName") },
                     navigationIcon = {
                         IconButton(onClick = {
                             navController.popBackStack()
