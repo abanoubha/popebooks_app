@@ -22,11 +22,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,11 +50,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
@@ -61,6 +69,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
+import java.text.Normalizer
+import kotlin.math.max
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,7 +123,228 @@ fun AppContent() {
                 navController = navController
             )
         }
+
+        composable(
+            route = "searchBookScreen/{bookId}",
+            arguments = listOf(navArgument("bookId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getInt("bookId") ?: -1
+            SearchBookScreen(bookId = bookId, db = db, navController = navController)
+        }
     }
+}
+
+fun normalizeArabic(text: String): String {
+    // Remove diacritics (ḥarakāt)
+    val noDiacritics = text.replace(Regex("[\\u064B-\\u0652]"), "") // Remove common harakat range
+
+    // Normalize Unicode (important for consistent comparisons)
+    return Normalizer.normalize(noDiacritics, Normalizer.Form.NFC) // or NFD, NFKC, NFKD as needed
+}
+
+fun createSummaryWithHighlight(text: String, word: String, limit: Int = 30): String {
+
+    // this doesnt work in Arabic
+    //val words = text.split("\\s+").filter { it.isNotBlank() }
+
+    // using Regex works in Arabic
+    val pattern = "([\\p{Block=Arabic}]+(?:\\u0020\\u06DB)?)".toRegex()
+    val words = pattern.findAll(text).map { it.value }.toList()
+
+    val lowerCaseWord = word.lowercase()
+    val normalizedWord = normalizeArabic(lowerCaseWord)
+
+    val wordIndex = words.indexOfFirst {
+        val normalizedTextWord = normalizeArabic(it.lowercase())
+        normalizedTextWord == normalizedWord
+    }
+
+    if (wordIndex == -1) {
+        // Word not found, return regular summary
+        return if (words.size <= limit) {
+            text
+        } else {
+            words.subList(0, limit).joinToString(" ") + "..." // Truncate and add ellipsis
+        }
+    }
+
+    val start = max(0, wordIndex - limit / 2) // Start around the word
+    val end = kotlin.math.min(words.size, start + limit) // End within bounds
+
+    val summaryWords = words.subList(start, end)
+    val summary = summaryWords.joinToString(" ")
+
+    return if (summaryWords.size < words.size) {
+        "...$summary..." // Add ellipsis if truncated
+    } else {
+        summary
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBookScreen(bookId: Int, db: SQLiteDatabase, navController: NavController) {
+    var isLoading by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
+
+    LaunchedEffect(searchQuery) {
+        isLoading = true
+        searchResults = searchBookContent(db, bookId, searchQuery)
+        isLoading = false
+    }
+
+    BackHandler {
+        navController.popBackStack()
+    }
+
+    PopebooksTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Search in Book of $bookId") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            navController.popBackStack()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
+                )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else {
+
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Default.Search),
+                                contentDescription = "Search Icon"
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
+                                        contentDescription = "Clear Icon"
+                                    )
+                                }
+                            }
+                        },
+                        placeholder = { Text("Search") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Search
+                        ),
+                        singleLine = true, // Ensures the text field stays on one line
+                    )
+
+                    Text(
+                        text = "Search Results (" + searchResults.size + ") :",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                    ) {
+                        items(searchResults) { result ->
+                            Card(
+                                onClick = {
+                                    navController.navigate("bookReader/${result.bookId}/${result.pageNumber}")
+                                },
+                                modifier = Modifier.padding(8.dp),
+                            ) {
+                                Text(
+                                    "book: " + result.bookName,
+                                    fontSize = 18.sp,
+                                )
+                                Text(
+                                    "page: " + result.pageNumber,
+                                    fontSize = 16.sp,
+                                )
+                                Text(
+                                    result.pageContent,
+                                    fontSize = 14.sp,
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
+}
+
+data class BookPage(
+    val bookId: Int,
+    val bookName: String,
+    val pageNumber: Int,
+    val pageContent: String
+)
+
+fun searchBookContent(db: SQLiteDatabase, bookId: Int, searchQuery: String): List<BookPage> {
+    if (searchQuery.isBlank()) {
+        return emptyList()
+    }
+
+    val bookPages = mutableListOf<BookPage>()
+
+    val cursor = db.rawQuery(
+        "SELECT b.id, b.name, p.number, p.content FROM books b JOIN pages p ON b.id = p.book_id WHERE b.id = ? AND p.content LIKE ?",
+        arrayOf(bookId.toString(), "%$searchQuery%")
+    )
+
+    cursor.use {
+        while (it.moveToNext()) {
+            val rBookId = it.getInt(it.getColumnIndexOrThrow("id"))
+            val rBookName = it.getString(it.getColumnIndexOrThrow("name"))
+            val rPageNumber = it.getInt(it.getColumnIndexOrThrow("number"))
+
+            val rPageContentLong = it.getString(it.getColumnIndexOrThrow("content"))
+
+            val rPageContent = createSummaryWithHighlight(rPageContentLong, searchQuery)
+
+            bookPages.add(
+                BookPage(
+                    rBookId,
+                    rBookName,
+                    rPageNumber,
+                    rPageContent
+                )
+            )
+        }
+    }
+    return bookPages
 }
 
 @Composable
@@ -220,15 +451,7 @@ fun BookReaderScreen(
 
     PopebooksTheme {
         Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
+            topBar = {
                 TopAppBar(
                     title = { Text(bookName) },
                     navigationIcon = {
@@ -244,8 +467,28 @@ fun BookReaderScreen(
                             )
                         }
                     },
+                    actions = {
+                        IconButton(onClick = {
+                            navController.navigate("searchBookScreen/$bookId")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "search in the book's content",
+                            )
+                        }
+                    },
                     modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier
