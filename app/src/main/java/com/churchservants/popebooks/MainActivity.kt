@@ -801,7 +801,7 @@ fun SearchScreen(
                                 }
                             }
                         },
-                        placeholder = { Text("Search") },
+                        placeholder = { Text(stringResource(R.string.search)) },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Search
