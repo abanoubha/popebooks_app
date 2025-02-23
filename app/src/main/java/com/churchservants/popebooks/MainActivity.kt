@@ -146,6 +146,14 @@ fun AppContent() {
                 sharedPreferences = sharedPreferences,
             )
         }
+
+        composable(route = "searchScreen") {
+            SearchScreen(
+                db = db,
+                navController = navController,
+                sharedPreferences = sharedPreferences,
+            )
+        }
     }
 }
 
@@ -422,6 +430,14 @@ fun BookListScreen(
                                 contentDescription = "search in the book's content",
                             )
                         }
+                        IconButton(onClick = {
+                            navController.navigate("searchScreen")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "search in all books",
+                            )
+                        }
                     },
                     modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
@@ -695,4 +711,176 @@ fun loadPageContent(db: SQLiteDatabase, bookId: Int, pageNumber: Int): String? {
         }
     }
     return null
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchScreen(
+    db: SQLiteDatabase,
+    navController: NavController,
+    sharedPreferences: SharedPreferences
+) {
+    var searchTerm by remember {
+        mutableStateOf(
+            sharedPreferences.getString(
+                "last_search_term",
+                ""
+            ) ?: ""
+        )
+    }
+
+    var isLoading by remember { mutableStateOf(false) }
+    var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
+
+    LaunchedEffect(searchTerm) {
+        isLoading = true
+        searchResults = searchAllBooksContent(db, searchTerm)
+        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+        isLoading = false
+    }
+
+    BackHandler {
+        navController.popBackStack()
+    }
+
+    PopebooksTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Search in all books") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            navController.popBackStack()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
+                )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else {
+
+                    TextField(
+                        value = searchTerm,
+                        onValueChange = { searchTerm = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Default.Search),
+                                contentDescription = "Search Icon"
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchTerm.isNotEmpty()) {
+                                IconButton(onClick = { searchTerm = "" }) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
+                                        contentDescription = "Clear Icon"
+                                    )
+                                }
+                            }
+                        },
+                        placeholder = { Text("Search") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Search
+                        ),
+                        singleLine = true, // Ensures the text field stays on one line
+                    )
+
+                    Text(
+                        text = "Search Results (" + searchResults.size + ") :",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                    ) {
+                        items(searchResults) { result ->
+                            Card(
+                                onClick = {
+                                    navController.navigate("bookReader/${result.bookId}/${result.pageNumber}")
+                                },
+                                modifier = Modifier.padding(8.dp),
+                            ) {
+                                Text(
+                                    "book: " + result.bookName,
+                                    fontSize = 18.sp,
+                                )
+                                Text(
+                                    "page: " + result.pageNumber,
+                                    fontSize = 16.sp,
+                                )
+                                Text(
+                                    result.pageContent,
+                                    fontSize = 14.sp,
+                                )
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
+}
+
+fun searchAllBooksContent(db: SQLiteDatabase, searchTerm: String): List<BookPage> {
+    if (searchTerm.isBlank()) {
+        return emptyList()
+    }
+
+    val bookPages = mutableListOf<BookPage>()
+
+    val cursor = db.rawQuery(
+        "SELECT b.id, b.name, p.number, p.content FROM books b JOIN pages p ON b.id = p.book_id WHERE p.content LIKE ?",
+        arrayOf("%$searchTerm%")
+    )
+
+    cursor.use {
+        while (it.moveToNext()) {
+            val rBookId = it.getInt(it.getColumnIndexOrThrow("id"))
+            val rBookName = it.getString(it.getColumnIndexOrThrow("name"))
+            val rPageNumber = it.getInt(it.getColumnIndexOrThrow("number"))
+
+            val rPageContentLong = it.getString(it.getColumnIndexOrThrow("content"))
+
+            val rPageContent = createSummaryWithHighlight(rPageContentLong, searchTerm)
+
+            bookPages.add(
+                BookPage(
+                    rBookId,
+                    rBookName,
+                    rPageNumber,
+                    rPageContent
+                )
+            )
+        }
+    }
+    return bookPages
 }
