@@ -302,7 +302,7 @@ fun SearchBookScreen(
                     )
 
                     Text(
-                        text = "Search Results (" + searchResults.size + ") :",
+                        text = stringResource(R.string.search_results, searchResults.size),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(16.dp)

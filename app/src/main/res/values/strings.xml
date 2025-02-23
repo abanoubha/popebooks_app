@@ -5,4 +5,5 @@
     <string name="titleIn">كتب البابا شنودة</string>
     <string name="search_in">Search in %1$s</string>
     <string name="search">Search</string>
+    <string name="search_results">Search Results (%1$s) :</string>
 </resources>
