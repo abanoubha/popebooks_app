@@ -32,14 +32,17 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -297,6 +300,10 @@ fun SearchBookScreen(
                             imeAction = ImeAction.Search
                         ),
                         singleLine = true, // Ensures the text field stays on one line
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        ),
                     )
 
                     Text(
@@ -316,6 +323,9 @@ fun SearchBookScreen(
                                 onClick = {
                                     navController.navigate("bookReader/${result.bookId}/${result.pageNumber}")
                                 },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                ),
                                 modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
@@ -813,6 +823,10 @@ fun SearchScreen(
                             imeAction = ImeAction.Search
                         ),
                         singleLine = true, // Ensures the text field stays on one line
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        ),
                     )
 
                     Text(
@@ -832,6 +846,9 @@ fun SearchScreen(
                                 onClick = {
                                     navController.navigate("bookReader/${result.bookId}/${result.pageNumber}")
                                 },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                ),
                                 modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
