@@ -76,15 +76,16 @@ fun SearchBookScreen(
     var note by remember { mutableStateOf("") }
 
     LaunchedEffect(searchQuery) {
-        if (searchQuery.trim().length > 2) {
-            isLoading = true
-            note = ""
-            searchResults = searchBookContent(db, bookId, searchQuery)
-            sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
-            isLoading = false
-        } else {
+        if (searchQuery.trim().length < 3) {
             note = "search query must be more than 2 letters"
+            return@LaunchedEffect
         }
+
+        isLoading = true
+        note = ""
+        searchResults = searchBookContent(db, bookId, searchQuery)
+        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
+        isLoading = false
     }
 
     BackHandler {
