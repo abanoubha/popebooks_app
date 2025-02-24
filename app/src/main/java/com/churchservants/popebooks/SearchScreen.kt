@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,12 +71,18 @@ fun SearchScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
+    var note by remember { mutableStateOf("") }
 
     LaunchedEffect(searchTerm) {
-        isLoading = true
-        searchResults = searchAllBooksContent(db, searchTerm)
-        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
-        isLoading = false
+        if (searchTerm.trim().length > 2) {
+            isLoading = true
+            note = ""
+            searchResults = searchAllBooksContent(db, searchTerm)
+            sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+            isLoading = false
+        } else {
+            note = "Search query must be more than 2 letters"
+        }
     }
 
     BackHandler {
@@ -108,14 +116,9 @@ fun SearchScreen(
                     .padding(innerPadding)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
-                } else {
-
                     TextField(
+                        isError = note != "", // show error hint
+                        enabled = false,
                         value = searchTerm,
                         onValueChange = { searchTerm = it },
                         modifier = Modifier
@@ -148,6 +151,73 @@ fun SearchScreen(
                             unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
                         ),
                     )
+
+                    if (note != "") {
+                        Text(
+                            note,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(R.string.search_results, searchResults.size),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else {
+
+                    TextField(
+                        isError = note != "", // show error hint
+                        value = searchTerm,
+                        onValueChange = { searchTerm = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Default.Search),
+                                contentDescription = "Search Icon"
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchTerm.isNotEmpty()) {
+                                IconButton(onClick = { searchTerm = "" }) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
+                                        contentDescription = "Clear Icon"
+                                    )
+                                }
+                            }
+                        },
+                        placeholder = { Text(stringResource(R.string.search)) },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Search
+                        ),
+                        singleLine = true, // Ensures the text field stays on one line
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        ),
+                    )
+
+                    if (note != "") {
+                        Text(
+                            note,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
 
                     Text(
                         text = stringResource(R.string.search_results, searchResults.size),
@@ -205,9 +275,12 @@ fun SearchScreen(
     }
 }
 
-fun searchAllBooksContent(db: SQLiteDatabase, searchTerm: String): List<BookPage> {
+suspend fun searchAllBooksContent(
+    db: SQLiteDatabase,
+    searchTerm: String
+): List<BookPage> = withContext(Dispatchers.IO) {
     if (searchTerm.isBlank()) {
-        return emptyList()
+        return@withContext emptyList()
     }
 
     val bookPages = mutableListOf<BookPage>()
@@ -237,5 +310,5 @@ fun searchAllBooksContent(db: SQLiteDatabase, searchTerm: String): List<BookPage
             )
         }
     }
-    return bookPages
+    return@withContext bookPages
 }
