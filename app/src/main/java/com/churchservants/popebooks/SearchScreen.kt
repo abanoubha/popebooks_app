@@ -161,13 +161,6 @@ fun SearchScreen(
                         )
                     }
 
-                    Text(
-                        text = stringResource(R.string.search_results, searchResults.size),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp)
-                    )
-
                     CircularProgressIndicator(
                         modifier = Modifier
                             .wrapContentWidth(Alignment.CenterHorizontally)
