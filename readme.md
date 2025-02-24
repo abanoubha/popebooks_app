@@ -21,8 +21,8 @@ In brief, the goals of the app are:
 
 Current state of the app according to the vision:
 
-- only 18 books were added
-- the app is around 10 MB which is great
+- all books were added
+- the app is around 40 MB which is great as it has all books
 - the app is available for smartphones with Android 5.0 (2014) up to Android 15 (2024, the latest version)
 
 ## Roadmap | timeline of release versions with tasks
@@ -43,12 +43,17 @@ Current state of the app according to the vision:
   - upgrade kotlin coroutines
 - v2.0.2
   - fix an issue with R8 minification called "missing classes". I wrote a blog about this incident.
-- v3.0.0
+- v3.0.0 (1)
   - app source code is now open source
   - rewrite the app in Kotlin with Jetpack Compose
   - touch gesture to swipe between pages of a book
   - remember the last open page
   - search in the content of all books
   - search in the content of a specific book
+- v3.1.0 (2)
+  - ui: use theme colors in search input and results views/widgets
+  - run SQL functions in IO coroutines for better performance
+  - show loading indicator while running the SQL search process
+  - sanitize user input in search
 - Next Version
   - 0 poems added
