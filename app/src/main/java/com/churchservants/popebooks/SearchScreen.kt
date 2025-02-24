@@ -3,6 +3,8 @@ package com.churchservants.popebooks
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -71,16 +74,17 @@ fun SearchScreen(
 
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
-    var note by remember { mutableStateOf("") }
+    var isSearchBarActive by remember { mutableStateOf(false) }
+    var performSearch by remember { mutableStateOf(false) }
 
-    LaunchedEffect(searchTerm) {
-        if (searchTerm.trim().length < 3) {
-            note = "Search query must be more than 2 letters"
-            return@LaunchedEffect
-        }
+    if (!performSearch && searchResults.isEmpty() && searchTerm != "") {
+        performSearch = true
+    }
+
+    LaunchedEffect(performSearch) {
+        if (!performSearch) return@LaunchedEffect
 
         isLoading = true
-        note = ""
         searchResults = searchAllBooksContent(db, searchTerm)
         sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
         isLoading = false
@@ -116,110 +120,61 @@ fun SearchScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
+                SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = searchTerm,
+                    onQueryChange = {
+                        searchTerm = it
+                        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+                    },
+                    onSearch = {
+                        isSearchBarActive = false
+                        searchTerm = it
+                        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+                        performSearch = true
+                    },
+                    active = isSearchBarActive,
+                    onActiveChange = {
+                        isSearchBarActive = it
+                    },
+                    placeholder = { Text(stringResource(R.string.search)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon"
+                        )
+                    },
+                    trailingIcon = {
+                        if (isSearchBarActive) {
+                            Icon(
+                                modifier = Modifier.clickable {
+                                    if (searchTerm.isNotEmpty()) {
+                                        searchTerm = ""
+                                    } else {
+                                        isSearchBarActive = false
+                                    }
+                                },
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Icon"
+                            )
+                        }
+                    },
+                ) { }
+                
+                Text(
+                    text = stringResource(R.string.search_results, searchResults.size),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+
                 if (isLoading) {
-                    TextField(
-                        isError = note != "", // show error hint
-                        enabled = false,
-                        value = searchTerm,
-                        onValueChange = { searchTerm = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        leadingIcon = {
-                            Icon(
-                                painter = rememberVectorPainter(image = Icons.Default.Search),
-                                contentDescription = "Search Icon"
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchTerm.isNotEmpty()) {
-                                IconButton(onClick = { searchTerm = "" }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
-                                        contentDescription = "Clear Icon"
-                                    )
-                                }
-                            }
-                        },
-                        placeholder = { Text(stringResource(R.string.search)) },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Search
-                        ),
-                        singleLine = true, // Ensures the text field stays on one line
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                        ),
-                    )
-
-                    if (note != "") {
-                        Text(
-                            note,
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
-
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
                 } else {
-
-                    TextField(
-                        isError = note != "", // show error hint
-                        value = searchTerm,
-                        onValueChange = { searchTerm = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        leadingIcon = {
-                            Icon(
-                                painter = rememberVectorPainter(image = Icons.Default.Search),
-                                contentDescription = "Search Icon"
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchTerm.isNotEmpty()) {
-                                IconButton(onClick = { searchTerm = "" }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
-                                        contentDescription = "Clear Icon"
-                                    )
-                                }
-                            }
-                        },
-                        placeholder = { Text(stringResource(R.string.search)) },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Search
-                        ),
-                        singleLine = true, // Ensures the text field stays on one line
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
-                        ),
-                    )
-
-                    if (note != "") {
-                        Text(
-                            note,
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(R.string.search_results, searchResults.size),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp)
-                    )
-
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
