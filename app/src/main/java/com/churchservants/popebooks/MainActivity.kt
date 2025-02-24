@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import java.text.Normalizer
+import java.util.regex.Pattern
 import kotlin.math.max
 import kotlin.math.min
 
@@ -154,4 +155,31 @@ fun getBookName(db: SQLiteDatabase, bookId: Int): String {
         }
     }
     return ""
+}
+
+fun sanitize(input: String): String {
+    // Regular expression to match allowed characters (English/Arabic text/numbers, whitespace)
+    val allowedCharsRegex =
+        Pattern.compile("[\\p{L}\\p{N}\\s\\u0600-\\u06FF]+") // Unicode ranges for Arabic
+
+    val sb = StringBuilder()
+    var previousWasWhitespace = false
+
+    for (char in input) {
+        if (allowedCharsRegex.matcher(char.toString()).matches()) {
+            if (char.isWhitespace()) {
+                if (!previousWasWhitespace) {
+                    sb.append(' ')
+                    previousWasWhitespace = true
+                }
+            } else {
+                sb.append(char)
+                previousWasWhitespace = false
+            }
+        }
+        // Disallowed characters are simply skipped.
+    }
+
+    // Escape special LIKE characters (% and _)
+    return sb.toString().replace("%", "\\%").replace("_", "\\_")
 }

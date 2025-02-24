@@ -79,6 +79,7 @@ fun SearchBookScreen(
         if (!performSearch) return@LaunchedEffect
 
         isLoading = true
+        searchQuery = sanitize(searchQuery)
         searchResults = searchBookContent(db, bookId, searchQuery)
         sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
         isLoading = false
