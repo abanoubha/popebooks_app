@@ -78,6 +78,7 @@ fun SearchBookScreen(
     LaunchedEffect(searchQuery) {
         if (searchQuery.trim().length > 2) {
             isLoading = true
+            note = ""
             searchResults = searchBookContent(db, bookId, searchQuery)
             sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
             isLoading = false
@@ -153,19 +154,14 @@ fun SearchBookScreen(
                         ),
                     )
 
-                    Text(
-                        note,
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
-
-                    Text(
-                        text = stringResource(R.string.search_results, searchResults.size),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    if (note != "") {
+                        Text(
+                            note,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
 
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -209,12 +205,14 @@ fun SearchBookScreen(
                         ),
                     )
 
-                    Text(
-                        note,
-                        color = MaterialTheme.colorScheme.error,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    if (note != "") {
+                        Text(
+                            note,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
 
                     Text(
                         text = stringResource(R.string.search_results, searchResults.size),
