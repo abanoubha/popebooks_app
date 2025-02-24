@@ -72,6 +72,7 @@ import androidx.navigation.navArgument
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import java.text.Normalizer
 import kotlin.math.max
+import kotlin.math.min
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,7 +191,7 @@ fun createSummaryWithHighlight(text: String, word: String, limit: Int = 30): Str
     }
 
     val start = max(0, wordIndex - limit / 2) // Start around the word
-    val end = kotlin.math.min(words.size, start + limit) // End within bounds
+    val end = min(words.size, start + limit) // End within bounds
 
     val summaryWords = words.subList(start, end)
     val summary = summaryWords.joinToString(" ")
@@ -318,16 +319,27 @@ fun SearchBookScreen(
                                 modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
-                                    "book: " + result.bookName,
-                                    fontSize = 18.sp,
-                                )
-                                Text(
-                                    "page: " + result.pageNumber,
+                                    stringResource(
+                                        R.string.book_page_no,
+                                        result.bookName,
+                                        result.pageNumber
+                                    ),
                                     fontSize = 16.sp,
+                                    style = TextStyle(textDirection = TextDirection.Content),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
                                 )
                                 Text(
                                     result.pageContent,
                                     fontSize = 14.sp,
+                                    style = TextStyle(textDirection = TextDirection.Content),
+                                    modifier = Modifier.padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 4.dp
+                                    ),
                                 )
                             }
                         }
@@ -823,16 +835,27 @@ fun SearchScreen(
                                 modifier = Modifier.padding(8.dp),
                             ) {
                                 Text(
-                                    "book: " + result.bookName,
-                                    fontSize = 18.sp,
-                                )
-                                Text(
-                                    "page: " + result.pageNumber,
+                                    stringResource(
+                                        R.string.book_page_no,
+                                        result.bookName,
+                                        result.pageNumber
+                                    ),
                                     fontSize = 16.sp,
+                                    style = TextStyle(textDirection = TextDirection.Content),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
                                 )
                                 Text(
                                     result.pageContent,
                                     fontSize = 14.sp,
+                                    style = TextStyle(textDirection = TextDirection.Content),
+                                    modifier = Modifier.padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 4.dp
+                                    ),
                                 )
                             }
                         }
