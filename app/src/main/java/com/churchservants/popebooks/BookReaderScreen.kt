@@ -47,8 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -232,62 +230,4 @@ fun getMaxPageCount(db: SQLiteDatabase, bookId: Int): Int {
         }
     }
     return 0
-}
-
-suspend fun searchBookContent(
-    db: SQLiteDatabase,
-    bookId: Int,
-    searchQuery: String
-): List<BookPage> =
-    withContext(Dispatchers.IO) {
-        if (searchQuery.isBlank()) {
-            return@withContext emptyList()
-        }
-
-        val bookPages = mutableListOf<BookPage>()
-
-        val cursor = db.rawQuery(
-            "SELECT b.id, b.name, p.number, p.content FROM books b JOIN pages p ON b.id = p.book_id WHERE b.id = ? AND p.content LIKE ?",
-            arrayOf(bookId.toString(), "%$searchQuery%")
-        )
-
-        cursor.use {
-            while (it.moveToNext()) {
-                val rBookId = it.getInt(it.getColumnIndexOrThrow("id"))
-                val rBookName = it.getString(it.getColumnIndexOrThrow("name"))
-                val rPageNumber = it.getInt(it.getColumnIndexOrThrow("number"))
-
-                val rPageContentLong = it.getString(it.getColumnIndexOrThrow("content"))
-
-                val rPageContent = createSummaryWithHighlight(rPageContentLong, searchQuery)
-
-                bookPages.add(
-                    BookPage(
-                        rBookId,
-                        rBookName,
-                        rPageNumber,
-                        rPageContent
-                    )
-                )
-            }
-        }
-        return@withContext bookPages
-    }
-
-fun loadPageContent(db: SQLiteDatabase, bookId: Int, pageNumber: Int): String? {
-    val cursor = db.query(
-        "pages",
-        arrayOf("content"),
-        "book_id = ? AND number = ?",
-        arrayOf(bookId.toString(), pageNumber.toString()),
-        null,
-        null,
-        null
-    )
-    cursor.use {
-        if (it.moveToNext()) {
-            return it.getString(it.getColumnIndexOrThrow("content"))
-        }
-    }
-    return null
 }
