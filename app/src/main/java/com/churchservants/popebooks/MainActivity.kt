@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +50,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -251,7 +249,6 @@ fun SearchBookScreen(
                             )
                         }
                     },
-                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
             },
             modifier = Modifier
@@ -440,7 +437,6 @@ fun BookListScreen(
                             )
                         }
                     },
-                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
             },
             modifier = Modifier
@@ -557,7 +553,6 @@ fun BookReaderScreen(
                             )
                         }
                     },
-                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
             },
             modifier = Modifier
@@ -759,7 +754,6 @@ fun SearchScreen(
                             )
                         }
                     },
-                    modifier = Modifier.background(color = Color(0xFFD1B000)), // Brownish-Yellowish
                 )
             },
             modifier = Modifier
