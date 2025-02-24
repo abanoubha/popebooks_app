@@ -73,6 +73,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.Normalizer
 import kotlin.math.max
 import kotlin.math.min
@@ -226,12 +228,17 @@ fun SearchBookScreen(
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(emptyList<BookPage>()) }
     val bookName by remember { mutableStateOf(getBookName(db = db, bookId = bookId)) }
+    var note by remember { mutableStateOf("") }
 
     LaunchedEffect(searchQuery) {
-        isLoading = true
-        searchResults = searchBookContent(db, bookId, searchQuery)
-        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
-        isLoading = false
+        if (searchQuery.trim().length > 2) {
+            isLoading = true
+            searchResults = searchBookContent(db, bookId, searchQuery)
+            sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
+            isLoading = false
+        } else {
+            note = "search query must be more than 2 letters"
+        }
     }
 
     BackHandler {
@@ -265,14 +272,9 @@ fun SearchBookScreen(
                     .padding(innerPadding)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
-                } else {
-
                     TextField(
+                        isError = note != "", // show error hint
+                        enabled = false,
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
@@ -304,6 +306,69 @@ fun SearchBookScreen(
                             focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
                         ),
+                    )
+
+                    Text(
+                        note,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+
+                    Text(
+                        text = stringResource(R.string.search_results, searchResults.size),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else {
+
+                    TextField(
+                        isError = note != "", // show error hint
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Default.Search),
+                                contentDescription = "Search Icon"
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Icons.Default.Clear),
+                                        contentDescription = "Clear Icon"
+                                    )
+                                }
+                            }
+                        },
+                        placeholder = { Text(stringResource(R.string.search)) },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Search
+                        ),
+                        singleLine = true, // Ensures the text field stays on one line
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                        ),
+                    )
+
+                    Text(
+                        note,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp),
                     )
 
                     Text(
@@ -369,40 +434,45 @@ data class BookPage(
     val pageContent: String
 )
 
-fun searchBookContent(db: SQLiteDatabase, bookId: Int, searchQuery: String): List<BookPage> {
-    if (searchQuery.isBlank()) {
-        return emptyList()
-    }
-
-    val bookPages = mutableListOf<BookPage>()
-
-    val cursor = db.rawQuery(
-        "SELECT b.id, b.name, p.number, p.content FROM books b JOIN pages p ON b.id = p.book_id WHERE b.id = ? AND p.content LIKE ?",
-        arrayOf(bookId.toString(), "%$searchQuery%")
-    )
-
-    cursor.use {
-        while (it.moveToNext()) {
-            val rBookId = it.getInt(it.getColumnIndexOrThrow("id"))
-            val rBookName = it.getString(it.getColumnIndexOrThrow("name"))
-            val rPageNumber = it.getInt(it.getColumnIndexOrThrow("number"))
-
-            val rPageContentLong = it.getString(it.getColumnIndexOrThrow("content"))
-
-            val rPageContent = createSummaryWithHighlight(rPageContentLong, searchQuery)
-
-            bookPages.add(
-                BookPage(
-                    rBookId,
-                    rBookName,
-                    rPageNumber,
-                    rPageContent
-                )
-            )
+suspend fun searchBookContent(
+    db: SQLiteDatabase,
+    bookId: Int,
+    searchQuery: String
+): List<BookPage> =
+    withContext(Dispatchers.IO) {
+        if (searchQuery.isBlank()) {
+            return@withContext emptyList()
         }
+
+        val bookPages = mutableListOf<BookPage>()
+
+        val cursor = db.rawQuery(
+            "SELECT b.id, b.name, p.number, p.content FROM books b JOIN pages p ON b.id = p.book_id WHERE b.id = ? AND p.content LIKE ?",
+            arrayOf(bookId.toString(), "%$searchQuery%")
+        )
+
+        cursor.use {
+            while (it.moveToNext()) {
+                val rBookId = it.getInt(it.getColumnIndexOrThrow("id"))
+                val rBookName = it.getString(it.getColumnIndexOrThrow("name"))
+                val rPageNumber = it.getInt(it.getColumnIndexOrThrow("number"))
+
+                val rPageContentLong = it.getString(it.getColumnIndexOrThrow("content"))
+
+                val rPageContent = createSummaryWithHighlight(rPageContentLong, searchQuery)
+
+                bookPages.add(
+                    BookPage(
+                        rBookId,
+                        rBookName,
+                        rPageNumber,
+                        rPageContent
+                    )
+                )
+            }
+        }
+        return@withContext bookPages
     }
-    return bookPages
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
