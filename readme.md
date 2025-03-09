@@ -9,6 +9,8 @@ Mainly there are 2 old codebases:
 
 But this new codebase (3rd) is written in Kotlin with UI in Jetpack Compose + SQLite db with more features.
 
+If you are wondering why I migrated the storage from plain text files to a local SQLite db, read my reasoning on [this post](https://abanoubhanna.com/posts/text-files-vs-sqlite-android/).
+
 ## My vision for the app
 
 I want this app to be the goto app for reading all books written by or about HH Pope Shenouda III.
