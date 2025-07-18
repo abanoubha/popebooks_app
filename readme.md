@@ -59,3 +59,5 @@ Current state of the app according to the vision:
   - sanitize user input in search
 - Next Version
   - 0 poems added
+  - book: "كتاب القرآن والمسيحية"
+
