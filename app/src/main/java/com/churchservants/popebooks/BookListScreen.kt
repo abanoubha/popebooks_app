@@ -143,8 +143,7 @@ fun loadBooks(db: SQLiteDatabase): List<Book> {
         while (it.moveToNext()) {
             val id = it.getInt(it.getColumnIndexOrThrow("id"))
             val name = it.getString(it.getColumnIndexOrThrow("name"))
-            val pages = it.getInt(it.getColumnIndexOrThrow("pages"))
-            books.add(Book(id, name, pages))
+            books.add(Book(id, name))
         }
     }
     return books
