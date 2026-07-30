@@ -1,6 +1,6 @@
 # Android app of Pope Shenouda's books
 
-A app to read all books of HH Pope Shenouda III in Arabic. Install the app from [Google Play](https://play.google.com/store/apps/details?id=com.churchservants.popebooks).
+An app to read all books of HH Pope Shenouda III in Arabic. Install the app from [Google Play](https://play.google.com/store/apps/details?id=com.churchservants.popebooks).
 
 Mainly there are 2 old codebases:
 
