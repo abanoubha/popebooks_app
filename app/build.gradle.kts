@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "com.churchservants.popebooks"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.churchservants.popebooks"
         minSdk = 21
-        targetSdk = 35
-        versionCode = 3
-        versionName = "3.2.0"
+        targetSdk = 36
+        versionCode = 4
+        versionName = "26.08.01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +35,8 @@ android {
     buildFeatures {
         compose = true
     }
+    compileSdkMinor = 1
+    buildToolsVersion = "36.0.0"
 }
 
 dependencies {
