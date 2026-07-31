@@ -58,7 +58,8 @@ Current state of the app according to the vision:
   - show loading indicator while running the SQL search process
   - sanitize user input in search
 - v26.08.01
-  - support up to Android 15 (SDK 35, 2025)
+  - support up to Android 16 (SDK 36, 2025)
+  - upgrade Kotlin/Android toolchain
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
