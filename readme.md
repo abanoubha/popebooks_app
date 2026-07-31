@@ -25,7 +25,7 @@ Current state of the app according to the vision:
 
 - all books were added
 - the app is around 40 MB which is great as it has all books
-- the app is available for smartphones with Android 5.0 (2014) up to Android 15 (2024, the latest version)
+- the app is available for smartphones with Android 5.0 (2014) up to Android 16 (2025, the latest version)
 
 ## Roadmap | timeline of release versions with tasks
 
@@ -57,6 +57,8 @@ Current state of the app according to the vision:
   - run SQL functions in IO coroutines for better performance
   - show loading indicator while running the SQL search process
   - sanitize user input in search
+- v26.08.01
+  - support up to Android 15 (SDK 35, 2025)
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
