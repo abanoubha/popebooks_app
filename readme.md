@@ -62,6 +62,7 @@ Current state of the app according to the vision:
   - upgrade Kotlin/Android toolchain
 - v26.08.02+5
   - 1st production release
+- v26.08.18+6
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
