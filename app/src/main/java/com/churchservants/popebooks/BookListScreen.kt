@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -95,22 +96,19 @@ fun BookListScreen(
                     },
                 )
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
+            modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    items(books) { book ->
-                        BookItem(book) {
-                            navController.navigate("bookReader/${book.id}/1")
-                        }
-                        HorizontalDivider()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .consumeWindowInsets(innerPadding),
+                contentPadding = innerPadding
+            ) {
+                items(books) { book ->
+                    BookItem(book) {
+                        navController.navigate("bookReader/${book.id}/1")
                     }
+                    HorizontalDivider()
                 }
             }
         }
