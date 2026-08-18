@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.churchservants.popebooks"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.churchservants.popebooks"
         minSdk = 21
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 6
         versionName = "26.08.18"
 

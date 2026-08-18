@@ -63,6 +63,7 @@ Current state of the app according to the vision:
 - v26.08.02+5
   - 1st production release
 - v26.08.18+6
+  - SDK 37
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
