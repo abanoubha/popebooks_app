@@ -8,4 +8,26 @@
     <string name="search_results">Search Results (%1$s) :</string>
     <string name="search_in_all_books">Search in all books</string>
     <string name="book_page_no">%1$s | page %2$s</string>
+    <string name="about_app">About App</string>
+    <string name="app_description">This app provides a collection of books by Pope Shenouda III.</string>
+    <string name="developer_name">Developer: Abanoub Hanna</string>
+    <string name="developer_info">I am a software developer creating full-stack web apps and Android apps. I dedicate some time to serving the church through technology.</string>
+    <string name="books">"Books: "</string>
+    <string name="nbooks">" books"</string>
+    <string name="contact_abanoub_hanna_via">Contact Abanoub Hanna via:</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="x_account">X account</string>
+    <string name="youtube">YouTube</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
+    <string name="facebook_page">Facebook page</string>
+    <string name="mobile_apps_i_developed">Mobile Apps I developed:</string>
+    <string name="pope_books">Pope books</string>
+    <string name="by_abanoub_ha">" by Abanoub HA"</string>
+    <string name="agpeya_app">Agpeya app</string>
+    <string name="kart_business_digital_cards">Kart Business: Digital Cards</string>
+    <string name="keme_pdf_all_in_one_tools">Keme PDF: all-in-one tools</string>
+    <string name="keme_cash_finance_task_book"><![CDATA[Keme Cash: Finance & Task Book]]></string>
+    <string name="ocr_text_scanner">OCR Text Scanner</string>
+    <string name="img2txt_pdf_image_to_text"><![CDATA[IMG2TXT: PDF & Image to Text]]></string>
 </resources>

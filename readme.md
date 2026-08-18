@@ -68,6 +68,7 @@ Current state of the app according to the vision:
   - use modern separate-lib material icons
   - minSDK 21->23
   - edge to edge theming
+  - aboutScreen
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

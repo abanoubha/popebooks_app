@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -91,6 +92,14 @@ fun BookListScreen(
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = "search in all books",
+                            )
+                        }
+                        IconButton(onClick = {
+                            navController.navigate("aboutScreen")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = "about app",
                             )
                         }
                     },

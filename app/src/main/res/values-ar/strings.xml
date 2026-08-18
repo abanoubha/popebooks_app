@@ -9,4 +9,26 @@
     <string name="search_results">نتائج البحث (%1$s) :</string>
     <string name="search_in_all_books">البحث في كل الكتب</string>
     <string name="book_page_no">%1$s | صـ %2$s</string>
+    <string name="about_app">عن التطبيق</string>
+    <string name="app_description">هذا التطبيق يوفر مجموعة من كتب قداسة البابا شنودة الثالث.</string>
+    <string name="developer_name">المطور: أبانوب حنا</string>
+    <string name="developer_info">أنا مبرمج ويب وتطبيقات أندرويد. أخصص بعض الوقت لخدمة الكنيسة في مجال التكنولوجيا.</string>
+    <string name="books">"الكتب المتاحة في التطبيق: "</string>
+    <string name="nbooks">" كتاب"</string>
+    <string name="contact_abanoub_hanna_via">التواصل مع أبانوب حنا عن طريق:</string>
+    <string name="linkedin">لينكد إن</string>
+    <string name="x_account">حساب إكس (تويتر سابقاً)</string>
+    <string name="youtube">يوتيوب</string>
+    <string name="github">جت هب</string>
+    <string name="telegram">تيليجرام</string>
+    <string name="facebook_page">صفحة فيسبوك</string>
+    <string name="mobile_apps_i_developed">تطبيقات الموبايل التي برمجتها:</string>
+    <string name="pope_books">تطبيق كتب البابا شنودة الثالث</string>
+    <string name="by_abanoub_ha">" الخاص بـ Abanoub HA"</string>
+    <string name="agpeya_app">تطبيق الأجبية</string>
+    <string name="kart_business_digital_cards">كرت بزنس: كروت عمل رقمية</string>
+    <string name="keme_pdf_all_in_one_tools">Keme PDF - أدوات تعديل وتحويل</string>
+    <string name="keme_cash_finance_task_book"><![CDATA[Keme Cash: إدارة مالية ومهام]]></string>
+    <string name="ocr_text_scanner">تطبيق استخراج النصوص</string>
+    <string name="img2txt_pdf_image_to_text"><![CDATA[IMG2TXT: استخراج النصوص من PDF أو صورة]]></string>
 </resources>

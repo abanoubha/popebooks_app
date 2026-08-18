@@ -98,6 +98,13 @@ fun AppContent() {
                 sharedPreferences = sharedPreferences,
             )
         }
+
+        composable(route = "aboutScreen") {
+            AboutScreen(
+                db = db,
+                navController = navController,
+            )
+        }
     }
 }
 
