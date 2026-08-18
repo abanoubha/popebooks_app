@@ -15,6 +15,10 @@ android {
         versionName = "26.08.18"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            debugSymbolLevel = "FULL"
+        }
     }
 
     buildTypes {

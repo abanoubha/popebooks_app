@@ -1,15 +1,18 @@
 # Android app of Pope Shenouda's books
 
-An app to read all books of HH Pope Shenouda III in Arabic. Install the app from [Google Play](https://play.google.com/store/apps/details?id=com.churchservants.popebooks).
+An app to read all books of HH Pope Shenouda III in Arabic. Install the app
+from [Google Play](https://play.google.com/store/apps/details?id=com.churchservants.popebooks).
 
 Mainly there are 2 old codebases:
 
 1. Java programming language + plain text files as database
 2. Java programming language + SQLite db
 
-But this new codebase (3rd) is written in Kotlin with UI in Jetpack Compose + SQLite db with more features.
+But this new codebase (3rd) is written in Kotlin with UI in Jetpack Compose + SQLite db with more
+features.
 
-If you are wondering why I migrated the storage from plain text files to a local SQLite db, read my reasoning on [this post](https://abanoubhanna.com/posts/text-files-vs-sqlite-android/).
+If you are wondering why I migrated the storage from plain text files to a local SQLite db, read my
+reasoning on [this post](https://abanoubhanna.com/posts/text-files-vs-sqlite-android/).
 
 ## My vision for the app
 
@@ -25,12 +28,14 @@ Current state of the app according to the vision:
 
 - all books were added
 - the app is around 40 MB which is great as it has all books
-- the app is available for smartphones with Android 5.0 (2014) up to Android 16 (2025, the latest version)
+- the app is available for smartphones with Android 5.0 (2014) up to Android 16 (2025, the latest
+  version)
 
 ## Roadmap | timeline of release versions with tasks
 
 - older app releases
-  - use plain text files as a database for each chapter of each app (I will explain this in a blog post and/or video)
+  - use plain text files as a database for each chapter of each app (I will explain this in a blog
+    post and/or video)
   - touch gestures to navigate pages of the books
   - written in Java with available Android/Java APIs/ABIs
 - v2.0.0
@@ -69,6 +74,7 @@ Current state of the app according to the vision:
   - minSDK 21->23
   - edge to edge theming
   - aboutScreen
+  - native symbols for Google Play
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
