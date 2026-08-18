@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.churchservants.popebooks"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 37
         versionCode = 6
         versionName = "26.08.18"
@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
