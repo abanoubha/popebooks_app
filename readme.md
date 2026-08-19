@@ -76,6 +76,8 @@ Current state of the app according to the vision:
   - aboutScreen
   - native symbols for Google Play
 - Next Version
+  - feeback
+  - ads
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
 
