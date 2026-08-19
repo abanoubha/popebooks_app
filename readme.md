@@ -75,6 +75,7 @@ Current state of the app according to the vision:
   - edge to edge theming
   - aboutScreen
   - native symbols for Google Play
+- v26.08.20+7
 - Next Version
   - feeback
   - ads
