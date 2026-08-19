@@ -31,4 +31,13 @@
     <string name="keme_cash_finance_task_book"><![CDATA[Keme Cash: إدارة مالية ومهام]]></string>
     <string name="ocr_text_scanner">تطبيق استخراج النصوص</string>
     <string name="img2txt_pdf_image_to_text"><![CDATA[IMG2TXT: استخراج النصوص من PDF أو صورة]]></string>
+    <string name="feedback_fab">ملاحظات</string>
+    <string name="report_bug">الإبلاغ عن خطأ</string>
+    <string name="suggest_feature">اقتراح ميزة</string>
+    <string name="ask_question">طرح سؤال</string>
+    <string name="give_feedback">تقديم ملاحظات عامة</string>
+    <string name="feedback_dialog_title">ملاحظات: %1$s</string>
+    <string name="feedback_hint">ادخل رسالتك هنا...</string>
+    <string name="send">إرسال</string>
+    <string name="cancel">إلغاء</string>
 </resources>

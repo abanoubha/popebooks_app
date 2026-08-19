@@ -30,4 +30,13 @@
     <string name="keme_cash_finance_task_book"><![CDATA[Keme Cash: Finance & Task Book]]></string>
     <string name="ocr_text_scanner">OCR Text Scanner</string>
     <string name="img2txt_pdf_image_to_text"><![CDATA[IMG2TXT: PDF & Image to Text]]></string>
+    <string name="feedback_fab">Feedback</string>
+    <string name="report_bug">Report a bug</string>
+    <string name="suggest_feature">Suggest a feature</string>
+    <string name="ask_question">Ask a question</string>
+    <string name="give_feedback">Give general feedback</string>
+    <string name="feedback_dialog_title">Feedback: %1$s</string>
+    <string name="feedback_hint">Enter your message here...</string>
+    <string name="send">Send</string>
+    <string name="cancel">Cancel</string>
 </resources>

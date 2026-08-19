@@ -1,25 +1,44 @@
 package com.churchservants.popebooks
 
+import android.content.Context
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
+import android.os.Build
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -35,15 +54,29 @@ import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
 
+    val context = LocalContext.current
     var bookCount by remember { mutableIntStateOf(0) }
+    var showFeedbackMenu by remember { mutableStateOf(false) }
+    var showFeedbackDialog by remember { mutableStateOf(false) }
+    var feedbackTypeLabel by remember { mutableStateOf("") }
+    var feedbackMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         bookCount = getBookCount(db)
     }
+
+    val feedbackOptions = listOf(
+        stringResource(R.string.report_bug),
+        stringResource(R.string.suggest_feature),
+        stringResource(R.string.ask_question),
+        stringResource(R.string.give_feedback)
+    )
 
     val annotatedText = buildAnnotatedString {
 
@@ -328,17 +361,118 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                     }
                 )
             },
+            floatingActionButton = {
+                Box(contentAlignment = Alignment.TopEnd) {
+                    FloatingActionButton(
+                        onClick = { showFeedbackMenu = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Email,
+                            contentDescription = stringResource(R.string.feedback_fab)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showFeedbackMenu,
+                        onDismissRequest = { showFeedbackMenu = false }
+                    ) {
+                        feedbackOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    feedbackTypeLabel = option
+                                    showFeedbackMenu = false
+                                    showFeedbackDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+            },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = annotatedText,
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
                 )
             }
+
+            if (showFeedbackDialog) {
+                AlertDialog(
+                    onDismissRequest = { showFeedbackDialog = false },
+                    title = { Text(stringResource(R.string.feedback_dialog_title, feedbackTypeLabel)) },
+                    text = {
+                        OutlinedTextField(
+                            value = feedbackMessage,
+                            onValueChange = { feedbackMessage = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.feedback_hint)) },
+                            minLines = 3
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                sendFeedbackEmail(context, feedbackTypeLabel, feedbackMessage)
+                                showFeedbackDialog = false
+                                feedbackMessage = ""
+                            }
+                        ) {
+                            Text(stringResource(R.string.send))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showFeedbackDialog = false
+                            feedbackMessage = ""
+                        }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
+            }
         }
     }
+}
+
+fun sendFeedbackEmail(
+    context: Context,
+    feedbackType: String,
+    message: String
+) {
+    val appVersion = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    } catch (e: Exception) {
+        "Unknown"
+    }
+    val androidVersion = Build.VERSION.RELEASE
+    val deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}"
+    val locale = Locale.getDefault().toString()
+
+    val emailBody = """
+        $message
+        
+        ---
+        App Version: $appVersion
+        Android Version: $androidVersion
+        Device Model: $deviceModel
+        Locale: $locale
+    """.trimIndent()
+
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:")
+        putExtra(Intent.EXTRA_EMAIL, arrayOf("popebooksapp@abanoubhanna.com"))
+        putExtra(Intent.EXTRA_SUBJECT, "[Feedback] PopeBooks Android app - $feedbackType")
+        putExtra(Intent.EXTRA_TEXT, emailBody)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(Intent.createChooser(intent, "Send Email"))
 }
 
 suspend fun getBookCount(db: SQLiteDatabase): Int = withContext(Dispatchers.IO) {
