@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,11 +27,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -37,8 +43,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +60,7 @@ fun BookListScreen(
     db: SQLiteDatabase,
     sharedPreferences: SharedPreferences
 ) {
+    val context = LocalContext.current
     val books = remember { loadBooks(db) }
     val stoppedAtBook by remember {
         mutableIntStateOf(
@@ -62,6 +76,25 @@ fun BookListScreen(
                 "stopped_at_page",
                 1
             ) ?: 1
+        )
+    }
+
+    var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
+
+    LaunchedEffect(Unit) {
+        RewardedAd.load(
+            context,
+            "ca-app-pub-4971969455307153/2790390808",
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    rewardedAd = null
+                }
+
+                override fun onAdLoaded(ad: RewardedAd) {
+                    rewardedAd = ad
+                }
+            }
         )
     }
 
@@ -105,19 +138,36 @@ fun BookListScreen(
                     },
                 )
             },
+            floatingActionButton = {
+                rewardedAd?.let { ad ->
+                    FloatingActionButton(onClick = {
+                        ad.show(context as android.app.Activity) {
+                            // User earned reward
+                            rewardedAd = null // Reset for next time if needed, or just leave it
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Filled.Star, contentDescription = "Watch Reward Ad")
+                    }
+                }
+            },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .consumeWindowInsets(innerPadding),
-                contentPadding = innerPadding
+                    .padding(innerPadding)
             ) {
-                items(books) { book ->
-                    BookItem(book) {
-                        navController.navigate("bookReader/${book.id}/1")
+                BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(books) { book ->
+                        BookItem(book) {
+                            navController.navigate("bookReader/${book.id}/1")
+                        }
+                        HorizontalDivider()
                     }
-                    HorizontalDivider()
                 }
             }
         }

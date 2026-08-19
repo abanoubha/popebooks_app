@@ -22,9 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +70,26 @@ fun BookReaderScreen(
     var pageContent by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var bookName by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
+
+    LaunchedEffect(Unit) {
+        RewardedAd.load(
+            context,
+            "ca-app-pub-4971969455307153/2790390808",
+            AdRequest.Builder().build(),
+            object : RewardedAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    rewardedAd = null
+                }
+
+                override fun onAdLoaded(ad: RewardedAd) {
+                    rewardedAd = ad
+                }
+            }
+        )
+    }
 
     LaunchedEffect(bookId) {
         maxPages = getMaxPageCount(db, bookId)
@@ -108,6 +135,21 @@ fun BookReaderScreen(
                     },
                 )
             },
+            floatingActionButton = {
+                rewardedAd?.let { ad ->
+                    FloatingActionButton(
+                        onClick = {
+                            ad.show(context as android.app.Activity) {
+                                // User earned reward
+                                rewardedAd = null
+                            }
+                        },
+                        modifier = Modifier.padding(bottom = 60.dp)
+                    ) {
+                        Icon(imageVector = Icons.Filled.Star, contentDescription = "Watch Reward Ad")
+                    }
+                }
+            },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
             Column(
@@ -116,6 +158,8 @@ fun BookReaderScreen(
                     .consumeWindowInsets(innerPadding)
                     .padding(innerPadding)
             ) {
+                BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
+
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier

@@ -77,8 +77,8 @@ Current state of the app according to the vision:
   - native symbols for Google Play
 - v26.08.20+7
   - feedback system
+  - ads: banner ad (a must), and reward ad (optional)
 - Next Version
-  - ads
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
 

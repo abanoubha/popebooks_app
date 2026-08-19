@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.ads.MobileAds
 import java.text.Normalizer
 import java.util.regex.Pattern
 import kotlin.math.max
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        MobileAds.initialize(this) {}
         setContent {
             AppContent()
         }
