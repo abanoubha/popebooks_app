@@ -345,11 +345,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = stringResource(R.string.about_app),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
+                        AppTitle(stringResource(R.string.about_app))
                     },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
@@ -406,7 +402,14 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
             if (showFeedbackDialog) {
                 AlertDialog(
                     onDismissRequest = { showFeedbackDialog = false },
-                    title = { Text(stringResource(R.string.feedback_dialog_title, feedbackTypeLabel)) },
+                    title = {
+                        Text(
+                            stringResource(
+                                R.string.feedback_dialog_title,
+                                feedbackTypeLabel
+                            )
+                        )
+                    },
                     text = {
                         OutlinedTextField(
                             value = feedbackMessage,

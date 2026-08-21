@@ -5,13 +5,9 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -43,12 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
@@ -103,12 +96,7 @@ fun BookListScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = stringResource(R.string.titleIn),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(16.dp),
-                        )
+                        AppTitle(stringResource(R.string.titleIn))
                     },
                     actions = {
                         IconButton(onClick = {
@@ -146,7 +134,10 @@ fun BookListScreen(
                             rewardedAd = null // Reset for next time if needed, or just leave it
                         }
                     }) {
-                        Icon(imageVector = Icons.Filled.Star, contentDescription = "Watch Reward Ad")
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Watch Reward Ad"
+                        )
                     }
                 }
             },

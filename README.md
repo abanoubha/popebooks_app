@@ -79,6 +79,7 @@ Current state of the app according to the vision:
   - feedback system
   - ads: banner ad (a must), and reward ad (optional)
   - fix: color of links in AboutScreen
+  - show app icon next to every screen title
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

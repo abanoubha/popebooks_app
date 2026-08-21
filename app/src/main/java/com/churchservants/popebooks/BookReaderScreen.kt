@@ -7,13 +7,10 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -112,7 +109,7 @@ fun BookReaderScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(bookName) },
+                    title = { AppTitle(bookName) },
                     navigationIcon = {
                         IconButton(onClick = {
                             navController.popBackStack()
@@ -146,7 +143,10 @@ fun BookReaderScreen(
                         },
                         modifier = Modifier.padding(bottom = 60.dp)
                     ) {
-                        Icon(imageVector = Icons.Filled.Star, contentDescription = "Watch Reward Ad")
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Watch Reward Ad"
+                        )
                     }
                 }
             },
