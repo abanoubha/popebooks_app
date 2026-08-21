@@ -112,7 +112,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://www.linkedin.com/in/abanoub-hanna/",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -128,7 +128,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://x.com/abanoubha",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -144,7 +144,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://youtube.com/@abanoubha",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -160,7 +160,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://github.com/abanoubha",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -176,7 +176,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://t.me/abanoubchan",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -192,7 +192,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://facebook.com/AbanoubHannaDotCom",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -215,7 +215,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.softwarepharaoh.popebooks",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -231,7 +231,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.softwarepharaoh.popebooks",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -248,7 +248,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.softwarepharaoh.agpeya",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -264,7 +264,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.kartbusiness.app",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -280,7 +280,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.abanoubhanna.pdf",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -296,7 +296,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.abanoubhanna.kemecash",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -312,7 +312,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.abanoubhanna.ocr",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
@@ -328,7 +328,7 @@ fun AboutScreen(db: SQLiteDatabase, navController: NavController) {
                 url = "https://play.google.com/store/apps/details?id=com.softwarepharaoh.img2txt",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     )
                 )
