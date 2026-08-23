@@ -2,6 +2,7 @@ package com.churchservants.popebooks
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -139,6 +141,12 @@ fun MainAdaptiveScreen(
         }
     }
 
+    BackHandler(enabled = pagerState.currentPage > 0) {
+        scope.launch {
+            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+        }
+    }
+
     PopebooksTheme {
         Scaffold(
             topBar = {
@@ -148,6 +156,20 @@ fun MainAdaptiveScreen(
                             AppTitle(stringResource(R.string.titleIn))
                         } else {
                             AppTitle(currentBookName)
+                        }
+                    },
+                    navigationIcon = {
+                        if (pagerState.currentPage > 0) {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                )
+                            }
                         }
                     },
                     actions = {

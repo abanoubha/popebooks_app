@@ -88,6 +88,7 @@ Current state of the app according to the vision:
   - less curvature for the 3 cards
   - add search in all books button to adaptive book list panel
   - add info button to adaptive book list panel
+  - add back button in adaptive reading and page list panels
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
