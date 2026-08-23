@@ -87,6 +87,7 @@ Current state of the app according to the vision:
   - fix: dark mode contrast for adaptive cards
   - less curvature for the 3 cards
   - add search in all books button to adaptive book list panel
+  - add info button to adaptive book list panel
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

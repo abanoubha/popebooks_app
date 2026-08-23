@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -157,6 +158,14 @@ fun MainAdaptiveScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Search,
                                     contentDescription = stringResource(R.string.search_in_all_books),
+                                )
+                            }
+                            IconButton(onClick = {
+                                navController.navigate("aboutScreen")
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Info,
+                                    contentDescription = stringResource(R.string.about_app),
                                 )
                             }
                         }
