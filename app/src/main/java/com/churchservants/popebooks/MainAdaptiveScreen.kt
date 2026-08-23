@@ -299,7 +299,8 @@ fun MainAdaptiveScreen(
                             2 -> {
                                 PageListPanel(
                                     bookId = currentBookId,
-                                    db = db
+                                    db = db,
+                                    currentPage = currentPageInReader
                                 ) { pageNumber ->
                                     scope.launch {
                                         currentPageInReader = pageNumber

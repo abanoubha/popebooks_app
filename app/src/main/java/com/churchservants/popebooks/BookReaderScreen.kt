@@ -3,6 +3,10 @@ package com.churchservants.popebooks
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -23,7 +28,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -74,38 +81,65 @@ fun ReaderPanel(
         }
     }
 
-    LazyColumn(
-        state = scrollState,
-        modifier = modifier.fillMaxSize()
-    ) {
-        items(maxPages) { index ->
-            val pageNumber = index + 1
-            val pageContent by produceState<String?>(initialValue = null, bookId, pageNumber) {
-                value = withContext(Dispatchers.IO) {
-                    loadPageContent(db, bookId, pageNumber)
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            state = scrollState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(maxPages) { index ->
+                val pageNumber = index + 1
+                val pageContent by produceState<String?>(initialValue = null, bookId, pageNumber) {
+                    value = withContext(Dispatchers.IO) {
+                        loadPageContent(db, bookId, pageNumber)
+                    }
+                }
+
+                Column {
+                    if (pageContent != null) {
+                        Text(
+                            text = pageContent!!,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Right,
+                            style = TextStyle(textDirection = TextDirection.Content),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    } else {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
+                    HorizontalDivider()
                 }
             }
+        }
 
-            Column {
-                if (pageContent != null) {
-                    Text(
-                        text = pageContent!!,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Right,
-                        style = TextStyle(textDirection = TextDirection.Content),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
-                } else {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                    )
-                }
-                HorizontalDivider()
+        val isScrolling = scrollState.isScrollInProgress
+        val firstVisibleItem = scrollState.firstVisibleItemIndex + 1
+
+        AnimatedVisibility(
+            visible = isScrolling,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp)
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp),
+                shadowElevation = 8.dp
+            ) {
+                Text(
+                    text = "$firstVisibleItem / $maxPages",
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
         }
     }
