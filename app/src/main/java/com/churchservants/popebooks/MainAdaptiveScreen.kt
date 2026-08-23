@@ -17,9 +17,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,18 +42,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.core.content.edit
+import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
@@ -77,7 +76,8 @@ fun MainAdaptiveScreen(
     val readerScrollState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val sharedPreferences = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+    val sharedPreferences =
+        remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val hintText = stringResource(R.string.three_panel_hint)
 
     var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
@@ -196,37 +196,48 @@ fun MainAdaptiveScreen(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     pageSpacing = 16.dp
                 ) { page ->
-                    when (page) {
-                        0 -> {
-                            BookListPanel(db = db) { bookId ->
-                                currentBookId = bookId
-                                currentPageInReader = 1
-                                scope.launch {
-                                    pagerState.animateScrollToPage(1)
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        when (page) {
+                            0 -> {
+                                BookListPanel(db = db) { bookId ->
+                                    currentBookId = bookId
+                                    currentPageInReader = 1
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(1)
+                                    }
                                 }
                             }
-                        }
 
-                        1 -> {
-                            ReaderPanel(
-                                bookId = currentBookId,
-                                db = db,
-                                currentPage = currentPageInReader,
-                                scrollState = readerScrollState
-                            )
-                        }
+                            1 -> {
+                                ReaderPanel(
+                                    bookId = currentBookId,
+                                    db = db,
+                                    currentPage = currentPageInReader,
+                                    scrollState = readerScrollState
+                                )
+                            }
 
-                        2 -> {
-                            PageListPanel(
-                                bookId = currentBookId,
-                                db = db
-                            ) { pageNumber ->
-                                scope.launch {
-                                    currentPageInReader = pageNumber
-                                    // Jump immediately to the page to avoid long animations blocking the UI
-                                    readerScrollState.scrollToItem(pageNumber - 1)
-                                    // Then animate the pager to show the reader
-                                    pagerState.animateScrollToPage(1)
+                            2 -> {
+                                PageListPanel(
+                                    bookId = currentBookId,
+                                    db = db
+                                ) { pageNumber ->
+                                    scope.launch {
+                                        currentPageInReader = pageNumber
+                                        // Jump immediately to the page to avoid long animations blocking the UI
+                                        readerScrollState.scrollToItem(pageNumber - 1)
+                                        // Then animate the pager to show the reader
+                                        pagerState.animateScrollToPage(1)
+                                    }
                                 }
                             }
                         }
@@ -243,9 +254,9 @@ fun MainAdaptiveScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     repeat(3) { iteration ->
-                        val color = if (pagerState.currentPage == iteration) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
+                        val color = if (pagerState.currentPage == iteration)
+                            MaterialTheme.colorScheme.primary
+                        else
                             MaterialTheme.colorScheme.outlineVariant
                         Box(
                             modifier = Modifier

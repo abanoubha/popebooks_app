@@ -84,6 +84,8 @@ Current state of the app according to the vision:
   - add visual hints for better UX in 3-panel layout
   - save 3-panel current book state
   - fix: instant page navigation
+  - fix: dark mode contrast for adaptive cards
+  - less curvature for the 3 cards
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
