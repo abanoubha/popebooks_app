@@ -150,6 +150,16 @@ fun MainAdaptiveScreen(
                         }
                     },
                     actions = {
+                        if (pagerState.currentPage == 0) {
+                            IconButton(onClick = {
+                                navController.navigate("searchScreen")
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Search,
+                                    contentDescription = stringResource(R.string.search_in_all_books),
+                                )
+                            }
+                        }
                         if (pagerState.currentPage == 1) {
                             IconButton(onClick = {
                                 navController.navigate("searchBookScreen/$currentBookId")
