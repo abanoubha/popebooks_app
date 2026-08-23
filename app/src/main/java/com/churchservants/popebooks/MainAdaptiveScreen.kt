@@ -56,7 +56,9 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +133,9 @@ fun MainAdaptiveScreen(
     }
 
     LaunchedEffect(currentBookId) {
-        currentBookName = getBookName(db, currentBookId)
+        currentBookName = withContext(Dispatchers.IO) {
+            getBookName(db, currentBookId)
+        }
     }
 
     PopebooksTheme {
@@ -219,7 +223,9 @@ fun MainAdaptiveScreen(
                             ) { pageNumber ->
                                 scope.launch {
                                     currentPageInReader = pageNumber
-                                    readerScrollState.animateScrollToItem(pageNumber - 1)
+                                    // Jump immediately to the page to avoid long animations blocking the UI
+                                    readerScrollState.scrollToItem(pageNumber - 1)
+                                    // Then animate the pager to show the reader
                                     pagerState.animateScrollToPage(1)
                                 }
                             }

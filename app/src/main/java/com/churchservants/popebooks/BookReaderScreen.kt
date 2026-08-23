@@ -60,7 +60,9 @@ fun ReaderPanel(
 ) {
     var maxPages by remember(bookId) { mutableIntStateOf(0) }
     LaunchedEffect(bookId) {
-        maxPages = getMaxPageCount(db, bookId)
+        maxPages = withContext(Dispatchers.IO) {
+            getMaxPageCount(db, bookId)
+        }
     }
 
     LaunchedEffect(bookId, currentPage, maxPages) {

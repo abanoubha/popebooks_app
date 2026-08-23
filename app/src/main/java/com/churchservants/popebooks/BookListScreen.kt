@@ -45,13 +45,20 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun BookListPanel(
     db: SQLiteDatabase,
     onBookSelected: (Int) -> Unit
 ) {
-    val books = remember { loadBooks(db) }
+    val books by produceState<List<Book>>(initialValue = emptyList()) {
+        value = withContext(Dispatchers.IO) {
+            loadBooks(db)
+        }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
