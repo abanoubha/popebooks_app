@@ -36,7 +36,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,7 +68,7 @@ fun MainAdaptiveScreen(
     initialPagerPage: Int = 1
 ) {
     val context = LocalContext.current
-    var currentBookId by remember { mutableIntStateOf(initialBookId) }
+    var currentBookId by rememberSaveable { mutableIntStateOf(initialBookId) }
     var currentBookName by remember { mutableStateOf("") }
     val pagerState = rememberPagerState(initialPage = initialPagerPage, pageCount = { 3 })
     val scope = rememberCoroutineScope()
@@ -74,6 +77,31 @@ fun MainAdaptiveScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val sharedPreferences = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val hintText = stringResource(R.string.three_panel_hint)
+
+    var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
+
+    LaunchedEffect(currentBookId, currentPageInReader) {
+        sharedPreferences.edit {
+            putInt("stopped_at_book", currentBookId)
+            putInt("stopped_at_page", currentPageInReader)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        sharedPreferences.edit {
+            putInt("stopped_at_pager_page", pagerState.currentPage)
+        }
+    }
+
+    LaunchedEffect(readerScrollState) {
+        snapshotFlow { readerScrollState.firstVisibleItemIndex }
+            .collect { index ->
+                val newPage = index + 1
+                if (currentPageInReader != newPage) {
+                    currentPageInReader = newPage
+                }
+            }
+    }
 
     LaunchedEffect(Unit) {
         val hintShown = sharedPreferences.getBoolean("three_panel_hint_shown", false)
@@ -84,8 +112,6 @@ fun MainAdaptiveScreen(
     }
 
     var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
-
-    var currentPageInReader by remember { mutableIntStateOf(initialPage) }
 
     LaunchedEffect(Unit) {
         RewardedAd.load(

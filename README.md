@@ -82,6 +82,7 @@ Current state of the app according to the vision:
   - show app icon next to every screen title
   - 3-panel adaptive layout
   - add visual hints for better UX in 3-panel layout
+  - save 3-panel current book state
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

@@ -57,12 +57,13 @@ fun AppContent() {
         composable("adaptiveMain") {
             val stoppedAtBook = sharedPreferences.getInt("stopped_at_book", 1)
             val stoppedAtPage = sharedPreferences.getInt("stopped_at_page", 1)
+            val stoppedAtPagerPage = sharedPreferences.getInt("stopped_at_pager_page", 0)
             MainAdaptiveScreen(
                 db = db,
                 navController = navController,
                 initialBookId = stoppedAtBook,
                 initialPage = stoppedAtPage,
-                initialPagerPage = 0
+                initialPagerPage = stoppedAtPagerPage
             )
         }
 

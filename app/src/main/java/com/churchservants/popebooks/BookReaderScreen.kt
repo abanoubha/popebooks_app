@@ -63,7 +63,7 @@ fun ReaderPanel(
         maxPages = getMaxPageCount(db, bookId)
     }
 
-    LaunchedEffect(bookId, currentPage) {
+    LaunchedEffect(bookId, currentPage, maxPages) {
         if (currentPage > 0 && currentPage <= maxPages) {
             scrollState.scrollToItem(currentPage - 1)
         }
