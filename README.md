@@ -91,6 +91,7 @@ Current state of the app according to the vision:
   - add back button in adaptive reading and page list panels
   - ability to increase/decrease font size globally. Maximum font scalability: 400%
   - sync current page between reading and page list panels with scroll bubble
+  - adaptive two-pane layout for tablets (landscape) with list toggle
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

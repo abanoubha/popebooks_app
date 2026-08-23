@@ -1,6 +1,7 @@
 package com.churchservants.popebooks
 
 import android.content.Context
+import android.content.res.Configuration
 import android.database.sqlite.SQLiteDatabase
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -9,11 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,11 +25,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +58,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -75,6 +83,10 @@ fun MainAdaptiveScreen(
     initialPagerPage: Int = 1
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val isTabletLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            configuration.screenWidthDp >= 600
+
     var currentBookId by rememberSaveable { mutableIntStateOf(initialBookId) }
     var currentBookName by remember { mutableStateOf("") }
     val pagerState = rememberPagerState(initialPage = initialPagerPage, pageCount = { 3 })
@@ -90,7 +102,16 @@ fun MainAdaptiveScreen(
         mutableFloatStateOf(sharedPreferences.getFloat("font_scale", 1.0f))
     }
 
+    var isBookListVisible by rememberSaveable { mutableStateOf(isTabletLandscape) }
+    val showTwoPanes = isTabletLandscape && isBookListVisible
+
     var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
+
+    LaunchedEffect(showTwoPanes) {
+        if (showTwoPanes && pagerState.currentPage == 0) {
+            pagerState.scrollToPage(1)
+        }
+    }
 
     LaunchedEffect(currentBookId, currentPageInReader) {
         sharedPreferences.edit {
@@ -165,14 +186,14 @@ fun MainAdaptiveScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        if (pagerState.currentPage == 0) {
+                        if (pagerState.currentPage == 0 && !showTwoPanes) {
                             AppTitle(stringResource(R.string.titleIn))
                         } else {
                             AppTitle(currentBookName)
                         }
                     },
                     navigationIcon = {
-                        if (pagerState.currentPage > 0) {
+                        if (pagerState.currentPage > 0 && !showTwoPanes) {
                             IconButton(onClick = {
                                 scope.launch {
                                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
@@ -183,10 +204,19 @@ fun MainAdaptiveScreen(
                                     contentDescription = "Back",
                                 )
                             }
+                        } else if (isTabletLandscape) {
+                            IconButton(onClick = {
+                                isBookListVisible = !isBookListVisible
+                            }) {
+                                Icon(
+                                    imageVector = if (isBookListVisible) Icons.AutoMirrored.Filled.ViewList else Icons.Default.ViewHeadline,
+                                    contentDescription = "Toggle Book List",
+                                )
+                            }
                         }
                     },
                     actions = {
-                        if (pagerState.currentPage == 0) {
+                        if (pagerState.currentPage == 0 && !showTwoPanes) {
                             IconButton(onClick = {
                                 navController.navigate("searchScreen")
                             }) {
@@ -204,7 +234,17 @@ fun MainAdaptiveScreen(
                                 )
                             }
                         }
-                        if (pagerState.currentPage == 1) {
+                        if (pagerState.currentPage == 1 || showTwoPanes) {
+                            if (showTwoPanes) {
+                                IconButton(onClick = {
+                                    navController.navigate("searchScreen")
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Search,
+                                        contentDescription = stringResource(R.string.search_in_all_books),
+                                    )
+                                }
+                            }
                             IconButton(onClick = {
                                 fontScale = (fontScale + 0.1f).coerceAtMost(4.0f)
                             }) {
@@ -259,55 +299,96 @@ fun MainAdaptiveScreen(
             ) {
                 BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
 
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.weight(1f),
-                    userScrollEnabled = true,
-                    contentPadding = PaddingValues(horizontal = 24.dp),
-                    pageSpacing = 16.dp
-                ) { page ->
-                    Card(
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        when (page) {
-                            0 -> {
-                                BookListPanel(db = db) { bookId ->
-                                    currentBookId = bookId
-                                    currentPageInReader = 1
-                                    scope.launch {
+                Row(modifier = Modifier.weight(1f)) {
+                    if (showTwoPanes) {
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(0.3f)
+                                .padding(start = 24.dp, top = 12.dp, bottom = 12.dp, end = 8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            BookListPanel(db = db) { bookId ->
+                                currentBookId = bookId
+                                currentPageInReader = 1
+                                scope.launch {
+                                    if (pagerState.currentPage != 1) {
                                         pagerState.animateScrollToPage(1)
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            1 -> {
-                                ReaderPanel(
-                                    bookId = currentBookId,
-                                    db = db,
-                                    currentPage = currentPageInReader,
-                                    scrollState = readerScrollState
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.weight(if (showTwoPanes) 0.7f else 1f),
+                        userScrollEnabled = true,
+                        contentPadding = if (showTwoPanes) PaddingValues(horizontal = 8.dp) else PaddingValues(horizontal = 24.dp),
+                        pageSpacing = 16.dp
+                    ) { page ->
+                        if (showTwoPanes && page == 0) {
+                            // In two-pane mode, the list is on the left, so we show a placeholder here
+                            // Or we could show the search screen? 
+                            // But usually, we just want to avoid double list.
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Select a book from the list",
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
                             }
+                        } else {
+                            Card(
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(vertical = 12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                            ) {
+                                when (page) {
+                                    0 -> {
+                                        BookListPanel(db = db) { bookId ->
+                                            currentBookId = bookId
+                                            currentPageInReader = 1
+                                            scope.launch {
+                                                pagerState.animateScrollToPage(1)
+                                            }
+                                        }
+                                    }
 
-                            2 -> {
-                                PageListPanel(
-                                    bookId = currentBookId,
-                                    db = db,
-                                    currentPage = currentPageInReader
-                                ) { pageNumber ->
-                                    scope.launch {
-                                        currentPageInReader = pageNumber
-                                        // Jump immediately to the page to avoid long animations blocking the UI
-                                        readerScrollState.scrollToItem(pageNumber - 1)
-                                        // Then animate the pager to show the reader
-                                        pagerState.animateScrollToPage(1)
+                                    1 -> {
+                                        ReaderPanel(
+                                            bookId = currentBookId,
+                                            db = db,
+                                            currentPage = currentPageInReader,
+                                            scrollState = readerScrollState
+                                        )
+                                    }
+
+                                    2 -> {
+                                        PageListPanel(
+                                            bookId = currentBookId,
+                                            db = db,
+                                            currentPage = currentPageInReader
+                                        ) { pageNumber ->
+                                            scope.launch {
+                                                currentPageInReader = pageNumber
+                                                // Jump immediately to the page to avoid long animations blocking the UI
+                                                readerScrollState.scrollToItem(pageNumber - 1)
+                                                // Then animate the pager to show the reader
+                                                pagerState.animateScrollToPage(1)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -324,18 +405,21 @@ fun MainAdaptiveScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val pageRange = if (showTwoPanes) 1..2 else 0..2
                     repeat(3) { iteration ->
-                        val color = if (pagerState.currentPage == iteration)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.outlineVariant
-                        Box(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                                .size(8.dp)
-                        )
+                        if (iteration in pageRange || !showTwoPanes) {
+                            val color = if (pagerState.currentPage == iteration)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.outlineVariant
+                            Box(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .size(8.dp)
+                            )
+                        }
                     }
                 }
             }
