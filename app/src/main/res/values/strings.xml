@@ -39,4 +39,5 @@
     <string name="feedback_hint">Enter your message here...</string>
     <string name="send">Send</string>
     <string name="cancel">Cancel</string>
+    <string name="three_panel_hint">Swipe left or right to navigate between books, reader, and pages</string>
 </resources>

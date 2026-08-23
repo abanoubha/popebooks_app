@@ -1,12 +1,22 @@
 package com.churchservants.popebooks
 
+import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -14,7 +24,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,11 +37,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.core.content.edit
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
@@ -51,6 +70,18 @@ fun MainAdaptiveScreen(
     val pagerState = rememberPagerState(initialPage = initialPagerPage, pageCount = { 3 })
     val scope = rememberCoroutineScope()
     val readerScrollState = rememberLazyListState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val sharedPreferences = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+    val hintText = stringResource(R.string.three_panel_hint)
+
+    LaunchedEffect(Unit) {
+        val hintShown = sharedPreferences.getBoolean("three_panel_hint_shown", false)
+        if (!hintShown) {
+            snackbarHostState.showSnackbar(hintText)
+            sharedPreferences.edit { putBoolean("three_panel_hint_shown", true) }
+        }
+    }
 
     var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
 
@@ -102,6 +133,7 @@ fun MainAdaptiveScreen(
                     }
                 )
             },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 rewardedAd?.let { ad ->
                     FloatingActionButton(
@@ -130,7 +162,9 @@ fun MainAdaptiveScreen(
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.weight(1f),
-                    userScrollEnabled = true
+                    userScrollEnabled = true,
+                    contentPadding = PaddingValues(horizontal = 24.dp),
+                    pageSpacing = 16.dp
                 ) { page ->
                     when (page) {
                         0 -> {
@@ -164,6 +198,30 @@ fun MainAdaptiveScreen(
                                 }
                             }
                         }
+                    }
+                }
+
+                // Pager Indicator hint
+                Row(
+                    Modifier
+                        .height(24.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(3) { iteration ->
+                        val color = if (pagerState.currentPage == iteration) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.outlineVariant
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(8.dp)
+                        )
                     }
                 }
             }
