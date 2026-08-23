@@ -259,21 +259,3 @@ suspend fun searchBookContent(
         }
         return@withContext bookPages
     }
-
-fun loadPageContent(db: SQLiteDatabase, bookId: Int, pageNumber: Int): String? {
-    val cursor = db.query(
-        "pages",
-        arrayOf("content"),
-        "book_id = ? AND number = ?",
-        arrayOf(bookId.toString(), pageNumber.toString()),
-        null,
-        null,
-        null
-    )
-    cursor.use {
-        if (it.moveToNext()) {
-            return it.getString(it.getColumnIndexOrThrow("content"))
-        }
-    }
-    return null
-}

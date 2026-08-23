@@ -52,7 +52,19 @@ fun AppContent() {
     val sharedPreferences =
         remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
 
-    NavHost(navController = navController, startDestination = "bookList") {
+    NavHost(navController = navController, startDestination = "adaptiveMain") {
+
+        composable("adaptiveMain") {
+            val stoppedAtBook = sharedPreferences.getInt("stopped_at_book", 1)
+            val stoppedAtPage = sharedPreferences.getInt("stopped_at_page", 1)
+            MainAdaptiveScreen(
+                db = db,
+                navController = navController,
+                initialBookId = stoppedAtBook,
+                initialPage = stoppedAtPage,
+                initialPagerPage = 0
+            )
+        }
 
         composable("bookList") {
             BookListScreen(

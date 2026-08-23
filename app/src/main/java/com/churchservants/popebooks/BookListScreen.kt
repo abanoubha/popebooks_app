@@ -46,6 +46,24 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
+@Composable
+fun BookListPanel(
+    db: SQLiteDatabase,
+    onBookSelected: (Int) -> Unit
+) {
+    val books = remember { loadBooks(db) }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(books) { book ->
+            BookItem(book) {
+                onBookSelected(book.id)
+            }
+            HorizontalDivider()
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookListScreen(
@@ -54,7 +72,6 @@ fun BookListScreen(
     sharedPreferences: SharedPreferences
 ) {
     val context = LocalContext.current
-    val books = remember { loadBooks(db) }
     val stoppedAtBook by remember {
         mutableIntStateOf(
             sharedPreferences.getInt(
@@ -143,22 +160,10 @@ fun BookListScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
+            Column(modifier = Modifier.padding(innerPadding)) {
                 BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(books) { book ->
-                        BookItem(book) {
-                            navController.navigate("bookReader/${book.id}/1")
-                        }
-                        HorizontalDivider()
-                    }
+                BookListPanel(db = db) { bookId ->
+                    navController.navigate("bookReader/$bookId/1")
                 }
             }
         }
@@ -182,17 +187,4 @@ fun BookItem(book: Book, onClick: () -> Unit) {
             style = TextStyle(textDirection = TextDirection.Content),
         )
     }
-}
-
-fun loadBooks(db: SQLiteDatabase): List<Book> {
-    val books = mutableListOf<Book>()
-    val cursor = db.query("books", null, null, null, null, null, null)
-    cursor.use {
-        while (it.moveToNext()) {
-            val id = it.getInt(it.getColumnIndexOrThrow("id"))
-            val name = it.getString(it.getColumnIndexOrThrow("name"))
-            books.add(Book(id, name))
-        }
-    }
-    return books
 }

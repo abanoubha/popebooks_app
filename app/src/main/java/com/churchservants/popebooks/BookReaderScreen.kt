@@ -3,27 +3,22 @@ package com.churchservants.popebooks
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -34,13 +29,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -52,6 +46,65 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+@Composable
+fun ReaderPanel(
+    bookId: Int,
+    db: SQLiteDatabase,
+    modifier: Modifier = Modifier,
+    initialPage: Int = 1,
+    currentPage: Int = 1,
+    scrollState: LazyListState = rememberLazyListState()
+) {
+    var maxPages by remember(bookId) { mutableIntStateOf(0) }
+    LaunchedEffect(bookId) {
+        maxPages = getMaxPageCount(db, bookId)
+    }
+
+    LaunchedEffect(bookId, currentPage) {
+        if (currentPage > 0 && currentPage <= maxPages) {
+            scrollState.scrollToItem(currentPage - 1)
+        }
+    }
+
+    LazyColumn(
+        state = scrollState,
+        modifier = modifier.fillMaxSize()
+    ) {
+        items(maxPages) { index ->
+            val pageNumber = index + 1
+            val pageContent by produceState<String?>(initialValue = null, bookId, pageNumber) {
+                value = withContext(Dispatchers.IO) {
+                    loadPageContent(db, bookId, pageNumber)
+                }
+            }
+
+            Column {
+                if (pageContent != null) {
+                    Text(
+                        text = pageContent!!,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Right,
+                        style = TextStyle(textDirection = TextDirection.Content),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,126 +205,12 @@ fun BookReaderScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .consumeWindowInsets(innerPadding)
-                    .padding(innerPadding)
-            ) {
-                BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
-
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
-                } else if (pageContent != null) {
-                    val scrollState = rememberScrollState()
-
-                    Text(
-                        text = pageContent!!,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Right,
-                        style = TextStyle(textDirection = TextDirection.Content),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(16.dp)
-                            .verticalScroll(scrollState)
-                            .pointerInput(Unit) {
-                                detectHorizontalDragGestures { _, dragAmount ->
-                                    if (dragAmount > 50) { // Swipe Right (Next Page)
-                                        if (currentPage < maxPages) {
-                                            currentPage++
-                                            isLoading = true
-                                        }
-                                    } else if (dragAmount < -50) { // Swipe Left (Previos Page)
-                                        if (currentPage > 1) {
-                                            currentPage--
-                                            isLoading = true
-                                        }
-                                    }
-                                }
-                            },
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Button(
-                            onClick = {
-                                if (currentPage > 1) {
-                                    currentPage--
-                                }
-                            },
-                            enabled = currentPage > 1 && !isLoading,
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.previous_btn),
-                            )
-                            Text(stringResource(R.string.previous_btn))
-                        }
-                        Text(
-                            "$currentPage / $maxPages",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Button(
-                            onClick = {
-                                if (currentPage < maxPages) {
-                                    currentPage++
-                                }
-                            },
-                            enabled = currentPage < maxPages && !isLoading,
-                        ) {
-                            Text(stringResource(R.string.next_btn))
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = stringResource(R.string.next_btn),
-                            )
-                        }
-                    }
-                } else {
-                    // Handle cases where page content is not found
-                    Text("Error loading page. Please try again.", textAlign = TextAlign.Center)
-                }
-
-            }
+            ReaderPanel(
+                bookId = bookId,
+                db = db,
+                currentPage = pageNumber,
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
-}
-
-fun getMaxPageCount(db: SQLiteDatabase, bookId: Int): Int {
-// this code is correct, but I did not include pages count in the "pages" column yet
-//    val cursor =
-//        db.query("books", arrayOf("pages"), "id = ?", arrayOf(bookId.toString()), null, null, null)
-//    cursor.use {
-//        if (it.moveToFirst()) {
-//            return it.getInt(it.getColumnIndexOrThrow("pages"))
-//        }
-//    }
-//    return 0
-
-    // I'll use this code temporarily to get the max page number
-    // SELECT COUNT(*) FROM pages WHERE book_id = ?
-    val cursor = db.query(
-        "pages",
-        arrayOf("COUNT(*)"),
-        "book_id = ?",
-        arrayOf(bookId.toString()),
-        null,
-        null,
-        null
-    )
-    cursor.use {
-        if (it.moveToFirst()) {
-            return it.getInt(it.getColumnIndexOrThrow("COUNT(*)"))
-        }
-    }
-    return 0
 }
