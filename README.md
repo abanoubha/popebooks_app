@@ -89,6 +89,7 @@ Current state of the app according to the vision:
   - add search in all books button to adaptive book list panel
   - add info button to adaptive book list panel
   - add back button in adaptive reading and page list panels
+  - ability to increase/decrease font size globally. Maximum font scalability: 400%
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

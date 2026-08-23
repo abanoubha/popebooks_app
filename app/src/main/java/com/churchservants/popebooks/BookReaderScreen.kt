@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -123,6 +126,10 @@ fun BookReaderScreen(
     var isLoading by remember { mutableStateOf(false) }
     var bookName by remember { mutableStateOf("") }
 
+    var fontScale by remember {
+        mutableFloatStateOf(sharedPreferences.getFloat("font_scale", 1.0f))
+    }
+
     val context = LocalContext.current
     var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
 
@@ -156,11 +163,15 @@ fun BookReaderScreen(
         isLoading = false
     }
 
+    LaunchedEffect(fontScale) {
+        sharedPreferences.edit().putFloat("font_scale", fontScale).apply()
+    }
+
     BackHandler {
         navController.popBackStack()
     }
 
-    PopebooksTheme {
+    PopebooksTheme(fontScale = fontScale) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -176,6 +187,22 @@ fun BookReaderScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = {
+                            fontScale = (fontScale + 0.1f).coerceAtMost(4.0f)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Increase font size",
+                            )
+                        }
+                        IconButton(onClick = {
+                            fontScale = (fontScale - 0.1f).coerceAtLeast(1.0f)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Remove,
+                                contentDescription = "Decrease font size",
+                            )
+                        }
                         IconButton(onClick = {
                             navController.navigate("searchBookScreen/$bookId")
                         }) {

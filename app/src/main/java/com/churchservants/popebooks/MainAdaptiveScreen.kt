@@ -21,7 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -38,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,12 +86,22 @@ fun MainAdaptiveScreen(
         remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val hintText = stringResource(R.string.three_panel_hint)
 
+    var fontScale by rememberSaveable {
+        mutableFloatStateOf(sharedPreferences.getFloat("font_scale", 1.0f))
+    }
+
     var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
 
     LaunchedEffect(currentBookId, currentPageInReader) {
         sharedPreferences.edit {
             putInt("stopped_at_book", currentBookId)
             putInt("stopped_at_page", currentPageInReader)
+        }
+    }
+
+    LaunchedEffect(fontScale) {
+        sharedPreferences.edit {
+            putFloat("font_scale", fontScale)
         }
     }
 
@@ -147,7 +160,7 @@ fun MainAdaptiveScreen(
         }
     }
 
-    PopebooksTheme {
+    PopebooksTheme(fontScale = fontScale) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -192,6 +205,22 @@ fun MainAdaptiveScreen(
                             }
                         }
                         if (pagerState.currentPage == 1) {
+                            IconButton(onClick = {
+                                fontScale = (fontScale + 0.1f).coerceAtMost(4.0f)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Add,
+                                    contentDescription = "Increase font size",
+                                )
+                            }
+                            IconButton(onClick = {
+                                fontScale = (fontScale - 0.1f).coerceAtLeast(1.0f)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Remove,
+                                    contentDescription = "Decrease font size",
+                                )
+                            }
                             IconButton(onClick = {
                                 navController.navigate("searchBookScreen/$currentBookId")
                             }) {
