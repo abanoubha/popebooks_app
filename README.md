@@ -97,6 +97,7 @@ Current state of the app according to the vision:
     classes that require reflection at runtime.
   - better card background color for search results
   - remove white background from the logo
+  - autosize title font and set it to consume 1 line (no wrapping)
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
