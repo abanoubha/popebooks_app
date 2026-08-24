@@ -99,6 +99,7 @@ Current state of the app according to the vision:
   - remove white background from the logo
   - autosize title font and set it to consume 1 line (no wrapping)
 - Next Version
+  - (many) bookmark a page in a book with optional color and notice/description
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
 
