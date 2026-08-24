@@ -96,6 +96,7 @@ Current state of the app according to the vision:
   - fix: crashing on startup due to R8 (ProGuard) shrinking and obfuscating Room / WorkManager
     classes that require reflection at runtime.
   - better card background color for search results
+  - remove white background from the logo
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
