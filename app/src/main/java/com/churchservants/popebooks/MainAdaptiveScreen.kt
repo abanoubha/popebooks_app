@@ -312,7 +312,7 @@ fun MainAdaptiveScreen(
                             ),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
-                            BookListPanel(db = db) { bookId ->
+                            BookListPanel(db = db, currentBookId = currentBookId) { bookId ->
                                 currentBookId = bookId
                                 currentPageInReader = 1
                                 scope.launch {
@@ -357,7 +357,7 @@ fun MainAdaptiveScreen(
                             ) {
                                 when (page) {
                                     0 -> {
-                                        BookListPanel(db = db) { bookId ->
+                                        BookListPanel(db = db, currentBookId = currentBookId) { bookId ->
                                             currentBookId = bookId
                                             currentPageInReader = 1
                                             scope.launch {

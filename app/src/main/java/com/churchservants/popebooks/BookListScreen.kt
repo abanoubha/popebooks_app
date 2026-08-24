@@ -2,6 +2,7 @@ package com.churchservants.popebooks
 
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
@@ -19,6 +21,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -31,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +56,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun BookListPanel(
     db: SQLiteDatabase,
+    currentBookId: Int = -1,
     onBookSelected: (Int) -> Unit
 ) {
     val books by produceState<List<Book>>(initialValue = emptyList()) {
@@ -59,11 +64,23 @@ fun BookListPanel(
             loadBooks(db)
         }
     }
+    val scrollState = rememberLazyListState()
+
+    LaunchedEffect(currentBookId) {
+        if (currentBookId != -1 && books.isNotEmpty()) {
+            val index = books.indexOfFirst { it.id == currentBookId }
+            if (index != -1 && !scrollState.isScrollInProgress) {
+                scrollState.scrollToItem((index - 2).coerceAtLeast(0))
+            }
+        }
+    }
+
     LazyColumn(
+        state = scrollState,
         modifier = Modifier.fillMaxSize()
     ) {
         items(books) { book ->
-            BookItem(book) {
+            BookItem(book, isSelected = book.id == currentBookId) {
                 onBookSelected(book.id)
             }
             HorizontalDivider()
@@ -169,7 +186,7 @@ fun BookListScreen(
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 BannerAdView(adUnitId = "ca-app-pub-4971969455307153/9009932763")
-                BookListPanel(db = db) { bookId ->
+                BookListPanel(db = db, currentBookId = stoppedAtBook) { bookId ->
                     navController.navigate("bookReader/$bookId/1")
                 }
             }
@@ -178,10 +195,11 @@ fun BookListScreen(
 }
 
 @Composable
-fun BookItem(book: Book, onClick: () -> Unit) {
+fun BookItem(book: Book, isSelected: Boolean = false, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent)
             .clickable { onClick() }
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -189,7 +207,8 @@ fun BookItem(book: Book, onClick: () -> Unit) {
         Text(
             book.name,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f), // to have the full width, so it can be RTL by the content direction
             style = TextStyle(textDirection = TextDirection.Content),
         )
