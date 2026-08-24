@@ -93,6 +93,8 @@ Current state of the app according to the vision:
   - sync current page between reading and page list panels with scroll bubble
   - adaptive two-pane layout for tablets (landscape) with list toggle
   - highlight/select current book in the book list
+  - fix: crashing on startup due to R8 (ProGuard) shrinking and obfuscating Room / WorkManager
+    classes that require reflection at runtime.
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"

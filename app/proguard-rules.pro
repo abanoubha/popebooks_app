@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Prevent R8 from obfuscating Room database implementations and reflection calls
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+
+# Keep WorkManager initializers and database classes intact
+-keep class androidx.work.impl.WorkDatabase_Impl {
+    <init>();
+}
+-keep class * extends androidx.work.InputMerger
+-keep class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
