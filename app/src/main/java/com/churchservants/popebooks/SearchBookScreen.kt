@@ -182,7 +182,7 @@ fun SearchBookScreen(
                                     navController.navigate("bookReader/${result.bookId}/${result.pageNumber}")
                                 },
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 ),
                                 modifier = Modifier.padding(8.dp),
                             ) {

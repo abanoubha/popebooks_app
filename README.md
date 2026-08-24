@@ -95,6 +95,7 @@ Current state of the app according to the vision:
   - highlight/select current book in the book list
   - fix: crashing on startup due to R8 (ProGuard) shrinking and obfuscating Room / WorkManager
     classes that require reflection at runtime.
+  - better card background color for search results
 - Next Version
   - 0 poems added
   - book: "كتاب القرآن والمسيحية"
