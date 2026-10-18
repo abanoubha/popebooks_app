@@ -19,9 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -30,6 +33,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,10 +46,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -57,6 +64,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -166,6 +174,14 @@ fun BookReaderScreen(
 
     val context = LocalContext.current
     var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val bookmarkAddedMsg = stringResource(R.string.bookmark_added)
+    val bookmarkRemovedMsg = stringResource(R.string.bookmark_removed)
+
+    var isBookmarkedState by remember(bookId, currentPage) {
+        mutableStateOf(isBookmarked(sharedPreferences, bookId, currentPage))
+    }
 
     LaunchedEffect(Unit) {
         RewardedAd.load(
@@ -222,6 +238,31 @@ fun BookReaderScreen(
                     },
                     actions = {
                         IconButton(onClick = {
+                            val snippet = pageContent?.take(100) ?: ""
+                            val isAdded = toggleBookmark(
+                                sharedPreferences,
+                                Bookmark(bookId, bookName, currentPage, snippet)
+                            )
+                            isBookmarkedState = isAdded
+                            val msg = if (isAdded) bookmarkAddedMsg else bookmarkRemovedMsg
+                            scope.launch {
+                                snackbarHostState.showSnackbar(msg)
+                            }
+                        }) {
+                            Icon(
+                                imageVector = if (isBookmarkedState) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = if (isBookmarkedState) stringResource(R.string.delete_bookmark) else stringResource(R.string.add_bookmark),
+                            )
+                        }
+                        IconButton(onClick = {
+                            navController.navigate("bookmarksScreen")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Bookmarks,
+                                contentDescription = stringResource(R.string.bookmarks),
+                            )
+                        }
+                        IconButton(onClick = {
                             fontScale = (fontScale + 0.1f).coerceAtMost(4.0f)
                         }) {
                             Icon(
@@ -248,6 +289,7 @@ fun BookReaderScreen(
                     },
                 )
             },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 rewardedAd?.let { ad ->
                     FloatingActionButton(

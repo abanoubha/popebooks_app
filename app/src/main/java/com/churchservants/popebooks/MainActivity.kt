@@ -120,6 +120,16 @@ fun AppContent() {
                 navController = navController,
             )
         }
+
+        composable(route = "bookmarksScreen") {
+            BookmarksScreen(
+                navController = navController,
+                sharedPreferences = sharedPreferences,
+                onSelectBookmark = { bookId, pageNumber ->
+                    navController.navigate("bookReader/$bookId/$pageNumber")
+                }
+            )
+        }
     }
 }
 

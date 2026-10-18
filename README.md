@@ -101,6 +101,7 @@ Current state of the app according to the vision:
 - v26.10.18+8
   - upgrade AGP and deps
   - drop support for SDK 23, currently minSDK is 24
+  - bookmarking system
 - Next Version
   - (many) bookmark a page in a book with optional color and notice/description
   - read aloud/read for me

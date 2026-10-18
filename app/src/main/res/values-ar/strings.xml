@@ -41,4 +41,10 @@
     <string name="send">إرسال</string>
     <string name="cancel">إلغاء</string>
     <string name="three_panel_hint">اسحب لليمين أو اليسار للتنقل بين قائمة الكتب، القارئ، وقائمة الصفحات</string>
+    <string name="bookmarks">العلامات المرجعية</string>
+    <string name="no_bookmarks">لا توجد صفحات محفوظة بعد</string>
+    <string name="bookmark_added">تم حفظ الصفحة في العلامات المرجعية</string>
+    <string name="bookmark_removed">تم إزالة العلامة المرجعية</string>
+    <string name="delete_bookmark">حذف العلامة المرجعية</string>
+    <string name="add_bookmark">حفظ الصفحة</string>
 </resources>

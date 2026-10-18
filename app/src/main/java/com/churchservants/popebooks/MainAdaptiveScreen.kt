@@ -27,11 +27,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ViewHeadline
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -97,6 +100,8 @@ fun MainAdaptiveScreen(
     val sharedPreferences =
         remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val hintText = stringResource(R.string.three_panel_hint)
+    val bookmarkAddedMsg = stringResource(R.string.bookmark_added)
+    val bookmarkRemovedMsg = stringResource(R.string.bookmark_removed)
 
     var fontScale by rememberSaveable {
         mutableFloatStateOf(sharedPreferences.getFloat("font_scale", 1.0f))
@@ -106,6 +111,10 @@ fun MainAdaptiveScreen(
     val showTwoPanes = isTabletLandscape && isBookListVisible
 
     var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
+
+    var isCurrentPageBookmarked by remember(currentBookId, currentPageInReader) {
+        mutableStateOf(isBookmarked(sharedPreferences, currentBookId, currentPageInReader))
+    }
 
     LaunchedEffect(showTwoPanes) {
         if (showTwoPanes && pagerState.currentPage == 0) {
@@ -218,6 +227,14 @@ fun MainAdaptiveScreen(
                     actions = {
                         if (pagerState.currentPage == 0 && !showTwoPanes) {
                             IconButton(onClick = {
+                                navController.navigate("bookmarksScreen")
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Bookmarks,
+                                    contentDescription = stringResource(R.string.bookmarks),
+                                )
+                            }
+                            IconButton(onClick = {
                                 navController.navigate("searchScreen")
                             }) {
                                 Icon(
@@ -235,6 +252,33 @@ fun MainAdaptiveScreen(
                             }
                         }
                         if (pagerState.currentPage == 1 || showTwoPanes) {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    val snippet = withContext(Dispatchers.IO) {
+                                        loadPageContent(db, currentBookId, currentPageInReader)
+                                    }?.take(100) ?: ""
+                                    val isAdded = toggleBookmark(
+                                        sharedPreferences,
+                                        Bookmark(currentBookId, currentBookName, currentPageInReader, snippet)
+                                    )
+                                    isCurrentPageBookmarked = isAdded
+                                    val msg = if (isAdded) bookmarkAddedMsg else bookmarkRemovedMsg
+                                    snackbarHostState.showSnackbar(msg)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = if (isCurrentPageBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                    contentDescription = if (isCurrentPageBookmarked) stringResource(R.string.delete_bookmark) else stringResource(R.string.add_bookmark),
+                                )
+                            }
+                            IconButton(onClick = {
+                                navController.navigate("bookmarksScreen")
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Bookmarks,
+                                    contentDescription = stringResource(R.string.bookmarks),
+                                )
+                            }
                             if (showTwoPanes) {
                                 IconButton(onClick = {
                                     navController.navigate("searchScreen")
