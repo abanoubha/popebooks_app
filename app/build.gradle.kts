@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.churchservants.popebooks"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 37
-        versionCode = 7
-        versionName = "26.08.20"
+        versionCode = 8
+        versionName = "26.10.18"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

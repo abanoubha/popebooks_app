@@ -98,6 +98,9 @@ Current state of the app according to the vision:
   - better card background color for search results
   - remove white background from the logo
   - autosize title font and set it to consume 1 line (no wrapping)
+- v26.10.18+8
+  - upgrade AGP and deps
+  - drop support for SDK 23, currently minSDK is 24
 - Next Version
   - (many) bookmark a page in a book with optional color and notice/description
   - read aloud/read for me
