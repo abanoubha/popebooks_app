@@ -46,4 +46,17 @@
     <string name="bookmark_removed">Bookmark removed</string>
     <string name="delete_bookmark">Remove bookmark</string>
     <string name="add_bookmark">Bookmark page</string>
+    <string name="daily_quote">Daily Quote</string>
+    <string name="daily_quote_widget_title">Pope Shenouda Daily Quote Widget</string>
+    <string name="daily_quote_channel_name">Daily Quote</string>
+    <string name="daily_quote_channel_desc">Daily quote notifications from Pope Shenouda III books</string>
+    <string name="quote_of_the_day">Pope Shenouda III Quote</string>
+    <string name="read_in_book">Read in Book</string>
+    <string name="share_quote">Share Quote</string>
+    <string name="copy_quote">Copy</string>
+    <string name="quote_copied">Quote copied to clipboard</string>
+    <string name="enable_daily_notifications">Enable Daily Notifications</string>
+    <string name="notifications_enabled">Daily quote notifications enabled</string>
+    <string name="notifications_disabled">Daily quote notifications disabled</string>
+    <string name="refresh">Refresh</string>
 </resources>

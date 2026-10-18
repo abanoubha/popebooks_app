@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
@@ -190,6 +191,17 @@ fun MainAdaptiveScreen(
         }
     }
 
+    var showDailyQuoteDialog by remember { mutableStateOf(false) }
+
+    if (showDailyQuoteDialog) {
+        DailyQuoteDialog(
+            onDismiss = { showDailyQuoteDialog = false },
+            onNavigateToReader = { bookId, pageNumber ->
+                navController.navigate("bookReader/$bookId/$pageNumber")
+            }
+        )
+    }
+
     PopebooksTheme(fontScale = fontScale) {
         Scaffold(
             topBar = {
@@ -248,6 +260,14 @@ fun MainAdaptiveScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Info,
                                     contentDescription = stringResource(R.string.about_app),
+                                )
+                            }
+                            IconButton(onClick = {
+                                showDailyQuoteDialog = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.FormatQuote,
+                                    contentDescription = stringResource(R.string.daily_quote),
                                 )
                             }
                         }

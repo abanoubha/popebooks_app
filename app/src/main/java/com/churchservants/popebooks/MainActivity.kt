@@ -25,14 +25,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         MobileAds.initialize(this) {}
+        NotificationHelper.createNotificationChannel(this)
+        NotificationHelper.scheduleDailyQuoteWork(this)
+
+        val initialBookId = intent.getIntExtra("EXTRA_BOOK_ID", -1)
+        val initialPageNumber = intent.getIntExtra("EXTRA_PAGE_NUMBER", -1)
+
         setContent {
-            AppContent()
+            AppContent(initialBookId, initialPageNumber)
         }
     }
 }
 
 @Composable
-fun AppContent() {
+fun AppContent(initialBookId: Int = -1, initialPageNumber: Int = -1) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val db = remember {
@@ -52,7 +58,13 @@ fun AppContent() {
     val sharedPreferences =
         remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
 
-    NavHost(navController = navController, startDestination = "adaptiveMain") {
+    val startDestination = if (initialBookId != -1 && initialPageNumber != -1) {
+        "bookReader/$initialBookId/$initialPageNumber"
+    } else {
+        "adaptiveMain"
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
 
         composable("adaptiveMain") {
             val stoppedAtBook = sharedPreferences.getInt("stopped_at_book", 1)

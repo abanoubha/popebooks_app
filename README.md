@@ -102,6 +102,7 @@ Current state of the app according to the vision:
   - upgrade AGP and deps
   - drop support for SDK 23, currently minSDK is 24
   - bookmarking system: (many) bookmark a page in a book
+  - daily quote by HH Pope Shenouda III
 - Next Version
   - read aloud/read for me
   - 0 poems added

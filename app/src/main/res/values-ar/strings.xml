@@ -47,4 +47,17 @@
     <string name="bookmark_removed">تم إزالة العلامة المرجعية</string>
     <string name="delete_bookmark">حذف العلامة المرجعية</string>
     <string name="add_bookmark">حفظ الصفحة</string>
+    <string name="daily_quote">حكمة اليوم</string>
+    <string name="daily_quote_widget_title">ودجت حكمة اليوم للبابا شنودة</string>
+    <string name="daily_quote_channel_name">حكمة اليوم</string>
+    <string name="daily_quote_channel_desc">إشعارات يومية بحكمة من كتب البابا شنودة الثالث</string>
+    <string name="quote_of_the_day">حكمة اليوم - قداسة البابا شنودة الثالث</string>
+    <string name="read_in_book">اقرأ في الكتاب</string>
+    <string name="share_quote">مشاركة الحكمة</string>
+    <string name="copy_quote">نسخ</string>
+    <string name="quote_copied">تم نسخ الحكمة</string>
+    <string name="enable_daily_notifications">تفعيل الإشعارات اليومية</string>
+    <string name="notifications_enabled">تم تفعيل إشعارات حكمة اليوم</string>
+    <string name="notifications_disabled">تم إلغاء إشعارات حكمة اليوم</string>
+    <string name="refresh">تحديث</string>
 </resources>
