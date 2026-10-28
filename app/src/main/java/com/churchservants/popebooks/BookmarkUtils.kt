@@ -1,6 +1,7 @@
 package com.churchservants.popebooks
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -36,7 +37,7 @@ fun saveBookmarks(prefs: SharedPreferences, bookmarks: List<Bookmark>) {
         }
         array.put(obj)
     }
-    prefs.edit().putString(KEY_BOOKMARKS, array.toString()).apply()
+    prefs.edit { putString(KEY_BOOKMARKS, array.toString()) }
 }
 
 fun isBookmarked(prefs: SharedPreferences, bookId: Int, pageNumber: Int): Boolean {
@@ -45,7 +46,8 @@ fun isBookmarked(prefs: SharedPreferences, bookId: Int, pageNumber: Int): Boolea
 
 fun toggleBookmark(prefs: SharedPreferences, bookmark: Bookmark): Boolean {
     val bookmarks = loadBookmarks(prefs).toMutableList()
-    val existingIndex = bookmarks.indexOfFirst { it.bookId == bookmark.bookId && it.pageNumber == bookmark.pageNumber }
+    val existingIndex =
+        bookmarks.indexOfFirst { it.bookId == bookmark.bookId && it.pageNumber == bookmark.pageNumber }
     val isAdded: Boolean
     if (existingIndex != -1) {
         bookmarks.removeAt(existingIndex)
@@ -59,6 +61,7 @@ fun toggleBookmark(prefs: SharedPreferences, bookmark: Bookmark): Boolean {
 }
 
 fun removeBookmark(prefs: SharedPreferences, bookId: Int, pageNumber: Int) {
-    val bookmarks = loadBookmarks(prefs).filterNot { it.bookId == bookId && it.pageNumber == pageNumber }
+    val bookmarks =
+        loadBookmarks(prefs).filterNot { it.bookId == bookId && it.pageNumber == pageNumber }
     saveBookmarks(prefs, bookmarks)
 }

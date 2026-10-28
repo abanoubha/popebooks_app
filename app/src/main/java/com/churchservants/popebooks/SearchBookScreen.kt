@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import kotlinx.coroutines.Dispatchers
@@ -109,7 +110,8 @@ fun SearchBookScreen(
             var pageStart = 1
             while (pageStart <= totalPages) {
                 val pageEnd = minOf(pageStart + chunkSize - 1, totalPages)
-                val chunkResults = searchBookContentPageRange(db, bookId, sanitized, pageStart, pageEnd)
+                val chunkResults =
+                    searchBookContentPageRange(db, bookId, sanitized, pageStart, pageEnd)
                 if (chunkResults.isNotEmpty()) {
                     mutableResults.addAll(chunkResults)
                     searchResults = mutableResults.toList()
@@ -124,7 +126,7 @@ fun SearchBookScreen(
         val elapsedTimeMs = System.currentTimeMillis() - startTime
         searchDurationSec = maxOf(elapsedTimeMs / 1000.0, 0.01)
 
-        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
+        sharedPreferences.edit { putString("last_search_query", searchQuery) }
         isLoading = false
         hasSearched = true
         performSearch = false
@@ -167,12 +169,12 @@ fun SearchBookScreen(
                     query = searchQuery,
                     onQueryChange = {
                         searchQuery = it
-                        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
+                        sharedPreferences.edit { putString("last_search_query", searchQuery) }
                     },
                     onSearch = {
                         isSearchBarActive = false
                         searchQuery = it
-                        sharedPreferences.edit().putString("last_search_query", searchQuery).apply()
+                        sharedPreferences.edit { putString("last_search_query", searchQuery) }
                         hasSearched = false
                         performSearch = true
                     },

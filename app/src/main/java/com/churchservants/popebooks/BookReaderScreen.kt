@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import com.google.android.gms.ads.AdRequest
@@ -208,13 +209,13 @@ fun BookReaderScreen(
     LaunchedEffect(bookId, currentPage) {
         isLoading = true
         pageContent = loadPageContent(db, bookId, currentPage)
-        sharedPreferences.edit().putInt("stopped_at_book", bookId).apply()
-        sharedPreferences.edit().putInt("stopped_at_page", currentPage).apply()
+        sharedPreferences.edit { putInt("stopped_at_book", bookId) }
+        sharedPreferences.edit { putInt("stopped_at_page", currentPage) }
         isLoading = false
     }
 
     LaunchedEffect(fontScale) {
-        sharedPreferences.edit().putFloat("font_scale", fontScale).apply()
+        sharedPreferences.edit { putFloat("font_scale", fontScale) }
     }
 
     BackHandler {
@@ -251,7 +252,9 @@ fun BookReaderScreen(
                         }) {
                             Icon(
                                 imageVector = if (isBookmarkedState) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                contentDescription = if (isBookmarkedState) stringResource(R.string.delete_bookmark) else stringResource(R.string.add_bookmark),
+                                contentDescription = if (isBookmarkedState) stringResource(R.string.delete_bookmark) else stringResource(
+                                    R.string.add_bookmark
+                                ),
                             )
                         }
                         IconButton(onClick = {

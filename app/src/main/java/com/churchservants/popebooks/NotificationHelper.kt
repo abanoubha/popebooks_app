@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.edit
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -41,7 +42,7 @@ object NotificationHelper {
 
     fun setNotificationEnabled(context: Context, enabled: Boolean) {
         val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putBoolean(PREF_NOTIFICATIONS_ENABLED, enabled).apply()
+        prefs.edit { putBoolean(PREF_NOTIFICATIONS_ENABLED, enabled) }
         if (enabled) {
             scheduleDailyQuoteWork(context)
         } else {
@@ -104,7 +105,15 @@ object NotificationHelper {
             .setContentText(quote.text)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText("${quote.text}\n\n— ${quote.bookName} (${context.getString(R.string.book_page_no, "", quote.pageNumber.toString()).trim()})")
+                    .bigText(
+                        "${quote.text}\n\n— ${quote.bookName} (${
+                            context.getString(
+                                R.string.book_page_no,
+                                "",
+                                quote.pageNumber.toString()
+                            ).trim()
+                        })"
+                    )
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)

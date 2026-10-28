@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import kotlinx.coroutines.Dispatchers
@@ -121,7 +122,7 @@ fun SearchScreen(
         searchDurationSec = maxOf(elapsedTimeMs / 1000.0, 0.01)
         matchingBooksCount = mutableResults.map { it.bookId }.distinct().size
 
-        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+        sharedPreferences.edit { putString("last_search_term", searchTerm) }
         isLoading = false
         hasSearched = true
         performSearch = false
@@ -164,12 +165,12 @@ fun SearchScreen(
                     query = searchTerm,
                     onQueryChange = {
                         searchTerm = it
-                        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+                        sharedPreferences.edit { putString("last_search_term", searchTerm) }
                     },
                     onSearch = {
                         isSearchBarActive = false
                         searchTerm = it
-                        sharedPreferences.edit().putString("last_search_term", searchTerm).apply()
+                        sharedPreferences.edit { putString("last_search_term", searchTerm) }
                         hasSearched = false
                         performSearch = true
                     },

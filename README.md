@@ -105,6 +105,7 @@ Current state of the app according to the vision:
   - daily quote by HH Pope Shenouda III
   - UX: show effort while searching by live statistics
   - UX: highlight the search query in search results
+  - refactor: use the KTX extension function SharedPreferences.edit instead
 - Next Version
   - read aloud/read for me
   - 0 poems added
