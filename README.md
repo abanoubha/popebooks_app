@@ -110,6 +110,7 @@ Current state of the app according to the vision:
   - bookmark icon button move from topAppBar to be on top of each book page
   - list of pages, shows if the page is bookmarked or not
 - v26.10.29+9
+  - fix: + ad_id permission in manifest
 - Next Version
   - read aloud/read for me
   - 0 poems added
