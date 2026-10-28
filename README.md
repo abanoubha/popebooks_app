@@ -103,6 +103,7 @@ Current state of the app according to the vision:
   - drop support for SDK 23, currently minSDK is 24
   - bookmarking system: (many) bookmark a page in a book
   - daily quote by HH Pope Shenouda III
+  - UX: show effort while searching by live statistics
 - Next Version
   - read aloud/read for me
   - 0 poems added
