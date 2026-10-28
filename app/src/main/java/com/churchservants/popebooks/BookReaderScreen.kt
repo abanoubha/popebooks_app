@@ -1,5 +1,6 @@
 package com.churchservants.popebooks
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import androidx.activity.compose.BackHandler
@@ -39,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -48,6 +50,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -75,12 +78,40 @@ fun ReaderPanel(
     modifier: Modifier = Modifier,
     initialPage: Int = 1,
     currentPage: Int = 1,
-    scrollState: LazyListState = rememberLazyListState()
+    scrollState: LazyListState = rememberLazyListState(),
+    sharedPreferences: SharedPreferences? = null,
+    onShowSnackbar: ((String) -> Unit)? = null
 ) {
+    val context = LocalContext.current
+    val prefs = sharedPreferences ?: remember(context) {
+        context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    }
+
     var maxPages by remember(bookId) { mutableIntStateOf(0) }
+    var bookName by remember(bookId) { mutableStateOf("") }
+
+    var bookmarkedPages by remember(bookId, prefs) {
+        mutableStateOf(loadBookmarks(prefs).filter { it.bookId == bookId }.map { it.pageNumber }.toSet())
+    }
+
+    DisposableEffect(prefs, bookId) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { p, key ->
+            if (key == "bookmarks_json" && p != null) {
+                bookmarkedPages = loadBookmarks(p).filter { it.bookId == bookId }.map { it.pageNumber }.toSet()
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
     LaunchedEffect(bookId) {
         maxPages = withContext(Dispatchers.IO) {
             getMaxPageCount(db, bookId)
+        }
+        bookName = withContext(Dispatchers.IO) {
+            getBookName(db, bookId)
         }
     }
 
@@ -89,6 +120,9 @@ fun ReaderPanel(
             scrollState.scrollToItem(currentPage - 1)
         }
     }
+
+    val bookmarkAddedMsg = stringResource(R.string.bookmark_added)
+    val bookmarkRemovedMsg = stringResource(R.string.bookmark_removed)
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -102,8 +136,34 @@ fun ReaderPanel(
                         loadPageContent(db, bookId, pageNumber)
                     }
                 }
+                val isPageBookmarked = bookmarkedPages.contains(pageNumber)
 
                 Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 8.dp, top = 4.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                val snippet = pageContent?.take(100) ?: ""
+                                val isAdded = toggleBookmark(
+                                    prefs,
+                                    Bookmark(bookId, bookName, pageNumber, snippet)
+                                )
+                                val msg = if (isAdded) bookmarkAddedMsg else bookmarkRemovedMsg
+                                onShowSnackbar?.invoke(msg)
+                            },
+                            modifier = Modifier.align(AbsoluteAlignment.TopRight)
+                        ) {
+                            Icon(
+                                imageVector = if (isPageBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = if (isPageBookmarked) stringResource(R.string.delete_bookmark) else stringResource(R.string.add_bookmark),
+                                tint = if (isPageBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
                     if (pageContent != null) {
                         Text(
                             text = pageContent!!,
@@ -112,7 +172,7 @@ fun ReaderPanel(
                             style = TextStyle(textDirection = TextDirection.Content),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                         )
                     } else {
                         CircularProgressIndicator(
@@ -165,8 +225,6 @@ fun BookReaderScreen(
 ) {
     var currentPage by remember { mutableIntStateOf(pageNumber) }
     var maxPages by remember { mutableIntStateOf(0) }
-    var pageContent by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
     var bookName by remember { mutableStateOf("") }
 
     var fontScale by remember {
@@ -177,12 +235,6 @@ fun BookReaderScreen(
     var rewardedAd by remember { mutableStateOf<RewardedAd?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val bookmarkAddedMsg = stringResource(R.string.bookmark_added)
-    val bookmarkRemovedMsg = stringResource(R.string.bookmark_removed)
-
-    var isBookmarkedState by remember(bookId, currentPage) {
-        mutableStateOf(isBookmarked(sharedPreferences, bookId, currentPage))
-    }
 
     LaunchedEffect(Unit) {
         RewardedAd.load(
@@ -207,11 +259,8 @@ fun BookReaderScreen(
     }
 
     LaunchedEffect(bookId, currentPage) {
-        isLoading = true
-        pageContent = loadPageContent(db, bookId, currentPage)
         sharedPreferences.edit { putInt("stopped_at_book", bookId) }
         sharedPreferences.edit { putInt("stopped_at_page", currentPage) }
-        isLoading = false
     }
 
     LaunchedEffect(fontScale) {
@@ -238,25 +287,6 @@ fun BookReaderScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            val snippet = pageContent?.take(100) ?: ""
-                            val isAdded = toggleBookmark(
-                                sharedPreferences,
-                                Bookmark(bookId, bookName, currentPage, snippet)
-                            )
-                            isBookmarkedState = isAdded
-                            val msg = if (isAdded) bookmarkAddedMsg else bookmarkRemovedMsg
-                            scope.launch {
-                                snackbarHostState.showSnackbar(msg)
-                            }
-                        }) {
-                            Icon(
-                                imageVector = if (isBookmarkedState) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                contentDescription = if (isBookmarkedState) stringResource(R.string.delete_bookmark) else stringResource(
-                                    R.string.add_bookmark
-                                ),
-                            )
-                        }
                         IconButton(onClick = {
                             navController.navigate("bookmarksScreen")
                         }) {
@@ -317,8 +347,15 @@ fun BookReaderScreen(
                 bookId = bookId,
                 db = db,
                 currentPage = pageNumber,
+                sharedPreferences = sharedPreferences,
+                onShowSnackbar = { msg ->
+                    scope.launch {
+                        snackbarHostState.showSnackbar(msg)
+                    }
+                },
                 modifier = Modifier.padding(innerPadding)
             )
         }
     }
 }
+

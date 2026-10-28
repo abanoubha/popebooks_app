@@ -101,8 +101,6 @@ fun MainAdaptiveScreen(
     val sharedPreferences =
         remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val hintText = stringResource(R.string.three_panel_hint)
-    val bookmarkAddedMsg = stringResource(R.string.bookmark_added)
-    val bookmarkRemovedMsg = stringResource(R.string.bookmark_removed)
 
     var fontScale by rememberSaveable {
         mutableFloatStateOf(sharedPreferences.getFloat("font_scale", 1.0f))
@@ -112,10 +110,6 @@ fun MainAdaptiveScreen(
     val showTwoPanes = isTabletLandscape && isBookListVisible
 
     var currentPageInReader by rememberSaveable { mutableIntStateOf(initialPage) }
-
-    var isCurrentPageBookmarked by remember(currentBookId, currentPageInReader) {
-        mutableStateOf(isBookmarked(sharedPreferences, currentBookId, currentPageInReader))
-    }
 
     LaunchedEffect(showTwoPanes) {
         if (showTwoPanes && pagerState.currentPage == 0) {
@@ -273,25 +267,6 @@ fun MainAdaptiveScreen(
                         }
                         if (pagerState.currentPage == 1 || showTwoPanes) {
                             IconButton(onClick = {
-                                scope.launch {
-                                    val snippet = withContext(Dispatchers.IO) {
-                                        loadPageContent(db, currentBookId, currentPageInReader)
-                                    }?.take(100) ?: ""
-                                    val isAdded = toggleBookmark(
-                                        sharedPreferences,
-                                        Bookmark(currentBookId, currentBookName, currentPageInReader, snippet)
-                                    )
-                                    isCurrentPageBookmarked = isAdded
-                                    val msg = if (isAdded) bookmarkAddedMsg else bookmarkRemovedMsg
-                                    snackbarHostState.showSnackbar(msg)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = if (isCurrentPageBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                    contentDescription = if (isCurrentPageBookmarked) stringResource(R.string.delete_bookmark) else stringResource(R.string.add_bookmark),
-                                )
-                            }
-                            IconButton(onClick = {
                                 navController.navigate("bookmarksScreen")
                             }) {
                                 Icon(
@@ -435,7 +410,13 @@ fun MainAdaptiveScreen(
                                             bookId = currentBookId,
                                             db = db,
                                             currentPage = currentPageInReader,
-                                            scrollState = readerScrollState
+                                            scrollState = readerScrollState,
+                                            sharedPreferences = sharedPreferences,
+                                            onShowSnackbar = { msg ->
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(msg)
+                                                }
+                                            }
                                         )
                                     }
 
@@ -443,7 +424,8 @@ fun MainAdaptiveScreen(
                                         PageListPanel(
                                             bookId = currentBookId,
                                             db = db,
-                                            currentPage = currentPageInReader
+                                            currentPage = currentPageInReader,
+                                            sharedPreferences = sharedPreferences
                                         ) { pageNumber ->
                                             scope.launch {
                                                 currentPageInReader = pageNumber
