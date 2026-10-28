@@ -6,9 +6,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,8 +24,6 @@ import androidx.navigation.navArgument
 import com.google.android.gms.ads.MobileAds
 import java.text.Normalizer
 import java.util.regex.Pattern
-import kotlin.math.max
-import kotlin.math.min
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -153,42 +158,121 @@ fun normalizeArabic(text: String): String {
     return Normalizer.normalize(noDiacritics, Normalizer.Form.NFC) // or NFD, NFKC, NFKD as needed
 }
 
+fun buildArabicFlexibleRegex(query: String): Regex? {
+    val trimmed = query.trim()
+    if (trimmed.isEmpty()) return null
+    val sb = java.lang.StringBuilder()
+    val harakatPattern = "[\\u064B-\\u0652]*"
+
+    for (i in trimmed.indices) {
+        val ch = trimmed[i]
+        if (i > 0 && !ch.isWhitespace()) {
+            sb.append(harakatPattern)
+        }
+        when (ch) {
+            'ا', 'أ', 'إ', 'آ', 'ٱ' -> sb.append("[اأإآٱ]")
+            'ى', 'ي', 'ئ' -> sb.append("[ىيئ]")
+            'ه', 'ة' -> sb.append("[هة]")
+            ' ' -> sb.append("\\s+")
+            else -> sb.append(Regex.escape(ch.toString()))
+        }
+    }
+    return try {
+        sb.toString().toRegex(RegexOption.IGNORE_CASE)
+    } catch (e: Exception) {
+        null
+    }
+}
+
 fun createSummaryWithHighlight(text: String, word: String, limit: Int = 30): String {
-
-    // this doesnt work in Arabic
-    //val words = text.split("\\s+").filter { it.isNotBlank() }
-
-    // using Regex works in Arabic
-    val pattern = "([\\p{Block=Arabic}]+(?:\\u0020\\u06DB)?)".toRegex()
-    val words = pattern.findAll(text).map { it.value }.toList()
-
-    val lowerCaseWord = word.lowercase()
-    val normalizedWord = normalizeArabic(lowerCaseWord)
-
-    val wordIndex = words.indexOfFirst {
-        val normalizedTextWord = normalizeArabic(it.lowercase())
-        normalizedTextWord == normalizedWord
+    val trimmedWord = word.trim()
+    if (trimmedWord.isEmpty() || text.isEmpty()) {
+        return text
     }
 
-    if (wordIndex == -1) {
-        // Word not found, return regular summary
-        return if (words.size <= limit) {
-            text
-        } else {
-            words.subList(0, limit).joinToString(" ") + "..." // Truncate and add ellipsis
+    val regex = buildArabicFlexibleRegex(trimmedWord)
+    val matchResult = regex?.find(text)
+
+    if (matchResult == null) {
+        return if (text.length <= 200) text else text.take(200) + "..."
+    }
+
+    val matchStart = matchResult.range.first
+    val matchEnd = matchResult.range.last + 1
+
+    val charRadius = limit * 6
+
+    var start = maxOf(0, matchStart - charRadius / 2)
+    var end = minOf(text.length, matchEnd + charRadius / 2)
+
+    if (start > 0) {
+        val prevSpace = text.lastIndexOf(' ', start)
+        if (prevSpace != -1 && prevSpace >= start - 20) {
+            start = prevSpace + 1
         }
     }
 
-    val start = max(0, wordIndex - limit / 2) // Start around the word
-    val end = min(words.size, start + limit) // End within bounds
+    if (end < text.length) {
+        val nextSpace = text.indexOf(' ', end)
+        if (nextSpace != -1 && nextSpace <= end + 20) {
+            end = nextSpace
+        }
+    }
 
-    val summaryWords = words.subList(start, end)
-    val summary = summaryWords.joinToString(" ")
+    val snippet = text.substring(start, end).trim()
+    val prefix = if (start > 0) "..." else ""
+    val suffix = if (end < text.length) "..." else ""
 
-    return if (summaryWords.size < words.size) {
-        "...$summary..." // Add ellipsis if truncated
-    } else {
-        summary
+    return "$prefix$snippet$suffix"
+}
+
+@Composable
+fun rememberHighlightAnnotatedString(
+    text: String,
+    query: String,
+    highlightColor: Color = MaterialTheme.colorScheme.primary,
+    highlightBackground: Color = MaterialTheme.colorScheme.primaryContainer
+): AnnotatedString {
+    return remember(text, query, highlightColor, highlightBackground) {
+        buildAnnotatedString {
+            if (query.isBlank() || text.isBlank()) {
+                append(text)
+            } else {
+                val regex = buildArabicFlexibleRegex(query)
+                if (regex == null) {
+                    append(text)
+                } else {
+                    val matches = regex.findAll(text).toList()
+                    if (matches.isEmpty()) {
+                        append(text)
+                    } else {
+                        var currentIndex = 0
+                        val spanStyle = SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = highlightColor,
+                            background = highlightBackground
+                        )
+
+                        for (match in matches) {
+                            val start = match.range.first
+                            val end = match.range.last + 1
+
+                            if (start > currentIndex) {
+                                append(text.substring(currentIndex, start))
+                            }
+                            withStyle(spanStyle) {
+                                append(text.substring(start, end))
+                            }
+                            currentIndex = end
+                        }
+
+                        if (currentIndex < text.length) {
+                            append(text.substring(currentIndex))
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

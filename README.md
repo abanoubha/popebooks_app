@@ -104,6 +104,7 @@ Current state of the app according to the vision:
   - bookmarking system: (many) bookmark a page in a book
   - daily quote by HH Pope Shenouda III
   - UX: show effort while searching by live statistics
+  - UX: highlight the search query in search results
 - Next Version
   - read aloud/read for me
   - 0 poems added

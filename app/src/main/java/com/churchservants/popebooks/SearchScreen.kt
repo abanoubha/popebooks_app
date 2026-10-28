@@ -281,8 +281,12 @@ fun SearchScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp, vertical = 4.dp),
                             )
+                            val highlightedContent = rememberHighlightAnnotatedString(
+                                text = result.pageContent,
+                                query = searchTerm
+                            )
                             Text(
-                                result.pageContent,
+                                text = highlightedContent,
                                 fontSize = 14.sp,
                                 style = TextStyle(textDirection = TextDirection.Content),
                                 modifier = Modifier.padding(
