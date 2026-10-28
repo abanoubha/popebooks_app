@@ -109,6 +109,7 @@ Current state of the app according to the vision:
   - refactor: Use the KTX extension function String.toUri instead of Uri.parse
   - bookmark icon button move from topAppBar to be on top of each book page
   - list of pages, shows if the page is bookmarked or not
+- v26.10.29+9
 - Next Version
   - read aloud/read for me
   - 0 poems added

@@ -11,8 +11,8 @@ android {
         applicationId = "com.churchservants.popebooks"
         minSdk = 24
         targetSdk = 37
-        versionCode = 8
-        versionName = "26.10.18"
+        versionCode = 9
+        versionName = "26.10.29"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
