@@ -3,7 +3,6 @@ package com.churchservants.popebooks
 import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.churchservants.popebooks.ui.theme.PopebooksTheme
 import kotlinx.coroutines.Dispatchers
@@ -469,7 +469,7 @@ fun sendFeedbackEmail(
     """.trimIndent()
 
     val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = Uri.parse("mailto:")
+        data = "mailto:".toUri()
         putExtra(Intent.EXTRA_EMAIL, arrayOf("popebooksapp@abanoubhanna.com"))
         putExtra(Intent.EXTRA_SUBJECT, "[Feedback] PopeBooks Android app - $feedbackType")
         putExtra(Intent.EXTRA_TEXT, emailBody)

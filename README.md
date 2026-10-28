@@ -106,6 +106,7 @@ Current state of the app according to the vision:
   - UX: show effort while searching by live statistics
   - UX: highlight the search query in search results
   - refactor: use the KTX extension function SharedPreferences.edit instead
+  - refactor: Use the KTX extension function String.toUri instead of Uri.parse
 - Next Version
   - read aloud/read for me
   - 0 poems added
